@@ -1,6 +1,6 @@
 using System;
 
-namespace UnityEngine.Splines
+namespace UnityEngine.YukselSplines
 {
     /// <summary>
     /// Attribute used to make an integer variable show in the Inspector as a popup menu with spline choices relative

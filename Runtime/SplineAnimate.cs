@@ -1,17 +1,17 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine.Splines;
+using UnityEngine.YukselSplines;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
 
-namespace UnityEngine.Splines
+namespace UnityEngine.YukselSplines
 {
     /// <summary>
     /// A component to animate an object along a spline.
     /// </summary>
-    [AddComponentMenu("Splines/Spline Animate")]
+    [AddComponentMenu("Yuksel Splines/Yuksel Spline Animate")]
     public class SplineAnimate : SplineComponent
     {
         /// <summary>

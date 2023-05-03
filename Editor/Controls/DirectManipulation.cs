@@ -3,7 +3,7 @@ using UnityEditor.SettingsManagement;
 using UnityEngine;
 using UnityEngine.Rendering;
 
-namespace UnityEditor.Splines
+namespace UnityEditor.YukselSplines
 {
     static class DirectManipulation
     {

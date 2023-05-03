@@ -5,7 +5,7 @@ using System.Linq;
 using Unity.Collections;
 using Unity.Mathematics;
 
-namespace UnityEngine.Splines
+namespace UnityEngine.YukselSplines
 {
     /// <summary>
     /// A read-only representation of <see cref="Spline"/> that is optimized for efficient access and queries.

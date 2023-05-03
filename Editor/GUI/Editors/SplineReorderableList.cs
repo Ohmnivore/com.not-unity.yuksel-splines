@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using UnityEditorInternal;
 using UnityEngine;
-using UnityEngine.Splines;
+using UnityEngine.YukselSplines;
 
-namespace UnityEditor.Splines
+namespace UnityEditor.YukselSplines
 {
     class SplineReorderableList : ReorderableList
     {

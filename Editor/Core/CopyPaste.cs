@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using Unity.Mathematics;
 using UnityEngine;
-using UnityEngine.Splines;
+using UnityEngine.YukselSplines;
 using Object = UnityEngine.Object;
 
-namespace UnityEditor.Splines
+namespace UnityEditor.YukselSplines
 {
     static class CopyPaste
     {

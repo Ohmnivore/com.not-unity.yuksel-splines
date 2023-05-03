@@ -1,10 +1,10 @@
 using System;
-using UnityEngine.Splines;
+using UnityEngine.YukselSplines;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace UnityEditor.Splines
+namespace UnityEditor.YukselSplines
 {
     sealed class ElementInspector : VisualElement, IDisposable
     {
@@ -28,9 +28,9 @@ namespace UnityEditor.Splines
         public ElementInspector()
         {
             if (s_CommonStyleSheet == null)
-                s_CommonStyleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>("Packages/com.unity.splines/Editor/Stylesheets/SplineInspectorCommon.uss");
+                s_CommonStyleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>("Packages/com.not-unity.yuksel-splines/Editor/Stylesheets/SplineInspectorCommon.uss");
             if (s_ThemeStyleSheet == null)
-                s_ThemeStyleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>($"Packages/com.unity.splines/Editor/Stylesheets/SplineInspector{(EditorGUIUtility.isProSkin ? "Dark" : "Light")}.uss");
+                s_ThemeStyleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>($"Packages/com.not-unity.yuksel-splines/Editor/Stylesheets/SplineInspector{(EditorGUIUtility.isProSkin ? "Dark" : "Light")}.uss");
 
             styleSheets.Add(s_CommonStyleSheet);
             styleSheets.Add(s_ThemeStyleSheet);

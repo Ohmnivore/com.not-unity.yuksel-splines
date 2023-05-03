@@ -1,7 +1,7 @@
 using UnityEngine;
-using UnityEngine.Splines;
+using UnityEngine.YukselSplines;
 
-namespace UnityEditor.Splines
+namespace UnityEditor.YukselSplines
 {
     [CustomPropertyDrawer(typeof(TangentMode))]
     class TangentModePropertyDrawer : PropertyDrawer

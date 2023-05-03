@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using Object = UnityEngine.Object;
 
-namespace UnityEditor.Splines
+namespace UnityEditor.YukselSplines
 {
     [Serializable]
     struct SelectableSplineElement : IEquatable<SelectableSplineElement>

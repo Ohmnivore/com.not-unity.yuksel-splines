@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Splines;
+using UnityEngine.YukselSplines;
 
-namespace UnityEditor.Splines
+namespace UnityEditor.YukselSplines
 {
     static class SplineSelectionUtility
     {

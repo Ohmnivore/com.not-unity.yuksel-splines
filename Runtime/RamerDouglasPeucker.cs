@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using Unity.Mathematics;
 
-namespace UnityEngine.Splines
+namespace UnityEngine.YukselSplines
 {
     class RamerDouglasPeucker<T> where T : IList<float3>
     {

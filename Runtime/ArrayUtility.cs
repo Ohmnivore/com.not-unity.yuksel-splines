@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace UnityEngine.Splines
+namespace UnityEngine.YukselSplines
 {
     static class ArrayUtility 
     {

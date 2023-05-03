@@ -1,8 +1,8 @@
 using System.Linq;
 using UnityEngine;
-using UnityEngine.Splines;
+using UnityEngine.YukselSplines;
 
-namespace UnityEditor.Splines
+namespace UnityEditor.YukselSplines
 {
     [CustomEditor(typeof(SplineExtrude))]
     [CanEditMultipleObjects]

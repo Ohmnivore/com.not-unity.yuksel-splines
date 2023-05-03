@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine.Serialization;
 
-namespace UnityEngine.Splines
+namespace UnityEngine.YukselSplines
 {
     /// <summary>
     /// Defines an interpolation ratio 't' for a Data Point.

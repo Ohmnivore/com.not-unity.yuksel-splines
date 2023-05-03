@@ -4,14 +4,14 @@ using System.Linq;
 using Unity.Mathematics;
 using UnityEditor.EditorTools;
 using UnityEngine;
-using UnityEngine.Splines;
+using UnityEngine.YukselSplines;
 using UObject = UnityEngine.Object;
 
 #if UNITY_2022_1_OR_NEWER
 using UnityEditor.Overlays;
 #endif
 
-namespace UnityEditor.Splines
+namespace UnityEditor.YukselSplines
 {
 #if UNITY_2022_1_OR_NEWER
     [CustomEditor(typeof(SplineToolContext))]
@@ -21,7 +21,7 @@ namespace UnityEditor.Splines
         {
             get
             {
-                yield return "Spline Tool Settings/Handle Visuals";
+                yield return "Yuksel Spline Tool Settings/Handle Visuals";
             }
         }
     }
@@ -38,7 +38,7 @@ namespace UnityEditor.Splines
 #endif
     public sealed class SplineToolContext : EditorToolContext
     {
-        const string k_IconPath = "Packages/com.unity.splines/Editor/Resources/Icons/SplineContext.png";
+        const string k_IconPath = "Packages/com.not-unity.yuksel-splines/Editor/Resources/Icons/SplineContext.png";
 
         static bool s_UseCustomSplineHandles = false;
 

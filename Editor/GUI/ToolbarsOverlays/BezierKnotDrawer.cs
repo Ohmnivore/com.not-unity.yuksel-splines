@@ -1,11 +1,11 @@
 using UnityEngine;
 using UnityEngine.UIElements;
-using UnityEngine.Splines;
+using UnityEngine.YukselSplines;
 #if !UNITY_2022_1_OR_NEWER
 using UnityEditor.UIElements;
 #endif
 
-namespace UnityEditor.Splines
+namespace UnityEditor.YukselSplines
 {
     sealed class BezierKnotDrawer : ElementDrawer<SelectableKnot>
     {

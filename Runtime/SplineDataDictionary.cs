@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace UnityEngine.Splines
+namespace UnityEngine.YukselSplines
 {
     [Serializable]
     class SplineDataKeyValuePair<T>

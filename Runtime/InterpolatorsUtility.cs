@@ -1,6 +1,6 @@
 using Unity.Mathematics;
 
-namespace UnityEngine.Splines
+namespace UnityEngine.YukselSplines
 {
     /// <summary>
     /// InterpolatorUtility provides easy access to all the different IInterpolator implementations.

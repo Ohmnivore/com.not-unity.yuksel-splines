@@ -6,7 +6,7 @@ using System.Linq;
 using Unity.Mathematics;
 using UObject = UnityEngine.Object;
 
-namespace UnityEngine.Splines
+namespace UnityEngine.YukselSplines
 {
     /// <summary>
     /// The Spline class is a collection of <see cref="BezierKnot"/>, the closed/open state, and editing representation.
@@ -41,7 +41,7 @@ namespace UnityEngine.Splines
 
             public void InvalidateCache()
             {
-                DistanceToInterpolation[0] = Splines.DistanceToInterpolation.Invalid;
+                DistanceToInterpolation[0] = YukselSplines.DistanceToInterpolation.Invalid;
             }
         }
 
@@ -223,7 +223,7 @@ namespace UnityEngine.Splines
         /// </summary>
         /// <remarks>
         /// In the editor this can be invoked many times per-frame.
-        /// Prefer to use <see cref="UnityEditor.Splines.EditorSplineUtility.AfterSplineWasModified"/> when
+        /// Prefer to use <see cref="UnityEditor.YukselSplines.EditorSplineUtility.AfterSplineWasModified"/> when
         /// working with splines in the editor.
         /// </remarks>
         [Obsolete("Deprecated, use " + nameof(Changed) + " instead.")]
@@ -238,7 +238,7 @@ namespace UnityEngine.Splines
         /// If the event does not target a specific knot, the second parameter will have the value of -1.
         ///
         /// In the editor this callback can be invoked many times per-frame.
-        /// Prefer to use <see cref="UnityEditor.Splines.EditorSplineUtility.AfterSplineWasModified"/> when
+        /// Prefer to use <see cref="UnityEditor.YukselSplines.EditorSplineUtility.AfterSplineWasModified"/> when
         /// working with splines in the editor.
         /// </remarks>
         /// <seealso cref="SplineModification"/>
@@ -294,7 +294,7 @@ namespace UnityEngine.Splines
         /// </summary>
         /// <remarks>
         /// In the editor this can be invoked many times per-frame.
-        /// Prefer to use <see cref="UnityEditor.Splines.EditorSplineUtility.AfterSplineWasModified"/> when working
+        /// Prefer to use <see cref="UnityEditor.YukselSplines.EditorSplineUtility.AfterSplineWasModified"/> when working
         /// with splines in the editor.
         /// </remarks>
         protected virtual void OnSplineChanged()

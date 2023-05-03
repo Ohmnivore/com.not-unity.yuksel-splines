@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using Unity.Mathematics;
 
-namespace UnityEngine.Splines
+namespace UnityEngine.YukselSplines
 {
     /// <summary>
     /// A collection of methods for extracting information about <see cref="Spline"/> types.
@@ -17,7 +17,7 @@ namespace UnityEngine.Splines
 
         /// <summary>
         /// The default tension value used for <see cref="TangentMode.AutoSmooth"/> knots.
-        /// Use with <see cref="Spline.SetTangentMode(UnityEngine.Splines.TangentMode)"/> and
+        /// Use with <see cref="Spline.SetTangentMode(UnityEngine.YukselSplines.TangentMode)"/> and
         /// <see cref="Spline.SetAutoSmoothTension(int,float)"/> to control the curvature of the spline at control
         /// points.
         /// </summary>
@@ -25,7 +25,7 @@ namespace UnityEngine.Splines
 
         /// <summary>
         /// The tension value for a Catmull-Rom type spline.
-        /// Use with <see cref="Spline.SetTangentMode(UnityEngine.Splines.TangentMode)"/> and
+        /// Use with <see cref="Spline.SetTangentMode(UnityEngine.YukselSplines.TangentMode)"/> and
         /// <see cref="Spline.SetAutoSmoothTension(int,float)"/> to control the curvature of the spline at control
         /// points.
         /// </summary>

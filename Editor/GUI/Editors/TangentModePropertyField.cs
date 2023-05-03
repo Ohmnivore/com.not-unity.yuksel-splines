@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
-using UnityEngine.Splines;
+using UnityEngine.YukselSplines;
 using UnityEngine.UIElements;
 
-namespace UnityEditor.Splines
+namespace UnityEditor.YukselSplines
 {
     sealed class TangentModePropertyField<T> : VisualElement
         where T : ISplineElement

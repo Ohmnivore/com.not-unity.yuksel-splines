@@ -1,9 +1,9 @@
 using System;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.Splines;
+using UnityEngine.YukselSplines;
 
-namespace UnityEditor.Splines
+namespace UnityEditor.YukselSplines
 {
     /// <summary>
     /// Creates a property drawer for <see cref="EmbeddedSplineData"/> types.

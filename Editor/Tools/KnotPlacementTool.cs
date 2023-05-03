@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEditor.EditorTools;
 using UnityEngine;
-using UnityEngine.Splines;
+using UnityEngine.YukselSplines;
 using Unity.Mathematics;
 using UnityEditor.SettingsManagement;
 using UnityEditor.ShortcutManagement;
@@ -18,7 +18,7 @@ using UnityEditor.Toolbars;
 using UnityEngine.UIElements;
 #endif
 
-namespace UnityEditor.Splines
+namespace UnityEditor.YukselSplines
 {
     [CustomEditor(typeof(KnotPlacementTool))]
 #if UNITY_2022_1_OR_NEWER
@@ -32,7 +32,7 @@ namespace UnityEditor.Splines
         protected override IEnumerable<string> toolbarElements
         {
 #endif
-            get { yield return "Spline Tool Settings/Default Knot Type"; }
+            get { yield return "Yuksel Spline Tool Settings/Default Knot Type"; }
         }
     }
 
@@ -789,7 +789,7 @@ namespace UnityEditor.Splines
             SceneView.RepaintAll();
         }
 
-        [Shortcut("Splines/Cycle Active Spline", typeof(SceneView), KeyCode.S)]
+        [Shortcut("Yuksel Splines/Cycle Active Spline", typeof(SceneView), KeyCode.S)]
         static void ShortcutCycleActiveSpline(ShortcutArguments args)
         {
             if (activeTool is KnotPlacementTool tool)

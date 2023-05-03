@@ -3,13 +3,13 @@ using UnityEngine;
 using UnityEngine.UIElements;
 using UnityEditor.Toolbars;
 
-namespace UnityEditor.Splines
+namespace UnityEditor.YukselSplines
 {
-    [EditorToolbarElement("Spline Tool Settings/Handle Rotation")]
+    [EditorToolbarElement("Yuksel Spline Tool Settings/Handle Rotation")]
     class HandleRotationDropdown : EditorToolbarDropdown
     {
-        const string k_ParentRotationIconPath = "Packages/com.unity.splines/Editor/Resources/Icons/ToolHandleParent.png";
-        const string k_ElementRotationIconPath = "Packages/com.unity.splines/Editor/Resources/Icons/ToolHandleElement.png";
+        const string k_ParentRotationIconPath = "Packages/com.not-unity.yuksel-splines/Editor/Resources/Icons/ToolHandleParent.png";
+        const string k_ElementRotationIconPath = "Packages/com.not-unity.yuksel-splines/Editor/Resources/Icons/ToolHandleElement.png";
         
         readonly List<GUIContent> m_OptionContents = new List<GUIContent>();
 

@@ -1,5 +1,5 @@
 
-namespace UnityEngine.Splines
+namespace UnityEngine.YukselSplines
 {
     /// <summary>
     /// Describes the direction of a <see cref="BezierKnot"/> tangent. A spline is composed of a list of

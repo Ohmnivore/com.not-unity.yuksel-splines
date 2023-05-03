@@ -1,6 +1,6 @@
 ﻿using Unity.Mathematics;
 
-namespace UnityEngine.Splines
+namespace UnityEngine.YukselSplines
 {
     /// <summary>
     /// Base class for SplineInstantiate and SplineExtrude, contains common elements to both of these Components

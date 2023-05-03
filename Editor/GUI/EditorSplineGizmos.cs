@@ -1,9 +1,9 @@
 using UnityEditor.EditorTools;
 using UnityEngine;
-using UnityEngine.Splines;
+using UnityEngine.YukselSplines;
 using UObject = UnityEngine.Object;
 
-namespace UnityEditor.Splines
+namespace UnityEditor.YukselSplines
 {
     static class EditorSplineGizmos
     {

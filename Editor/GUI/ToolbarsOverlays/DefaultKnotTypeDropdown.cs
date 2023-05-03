@@ -1,16 +1,16 @@
 ﻿using UnityEditor.Toolbars;
 using UnityEngine;
-using UnityEngine.Splines;
+using UnityEngine.YukselSplines;
 #if !UNITY_2022_1_OR_NEWER
 #endif
 
-namespace UnityEditor.Splines.Editor.GUI
+namespace UnityEditor.YukselSplines.Editor.GUI
 {
-    [EditorToolbarElement("Spline Tool Settings/Default Knot Type")]
+    [EditorToolbarElement("Yuksel Spline Tool Settings/Default Knot Type")]
     class DefaultKnotTypeDropdown : EditorToolbarDropdown
     {
-        const string k_LinearIconPath = "Packages/com.unity.splines/Editor/Resources/Icons/Tangent_Linear.png";
-        const string k_AutoSmoothIconPath = "Packages/com.unity.splines/Editor/Resources/Icons/AutoSmoothKnot.png";
+        const string k_LinearIconPath = "Packages/com.not-unity.yuksel-splines/Editor/Resources/Icons/Tangent_Linear.png";
+        const string k_AutoSmoothIconPath = "Packages/com.not-unity.yuksel-splines/Editor/Resources/Icons/AutoSmoothKnot.png";
         readonly GUIContent[] m_OptionContents = new GUIContent[2];
 
         public DefaultKnotTypeDropdown()

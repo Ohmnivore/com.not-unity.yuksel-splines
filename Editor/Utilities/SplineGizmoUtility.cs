@@ -1,9 +1,9 @@
 using System;
 using UnityEditor.SettingsManagement;
 using UnityEngine;
-using UnityEngine.Splines;
+using UnityEngine.YukselSplines;
 
-namespace UnityEditor.Splines
+namespace UnityEditor.YukselSplines
 {
     /// <summary>
     /// SplineGizmoUtility provides methods for drawing in-scene representations of Splines.

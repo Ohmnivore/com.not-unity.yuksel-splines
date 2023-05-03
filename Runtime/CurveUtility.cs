@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Mathematics;
 
-namespace UnityEngine.Splines
+namespace UnityEngine.YukselSplines
 {
     /// <summary>
     /// A collection of methods for extracting information about <see cref="BezierCurve"/> types.

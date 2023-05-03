@@ -1,7 +1,7 @@
 using UnityEngine;
-using UnityEngine.Splines;
+using UnityEngine.YukselSplines;
 
-namespace UnityEditor.Splines
+namespace UnityEditor.YukselSplines
 {
     /// <summary>
     /// Create a property drawer for <see cref="SplineInfo"/> types.

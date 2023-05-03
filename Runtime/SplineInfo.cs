@@ -1,7 +1,7 @@
 using System;
 using Unity.Mathematics;
 
-namespace UnityEngine.Splines
+namespace UnityEngine.YukselSplines
 {
     /// <summary>
     /// SplineInfo is used to wrap a reference to the <see cref="SplineContainer"/> and index within that container to
@@ -40,7 +40,7 @@ namespace UnityEngine.Splines
         public Transform Transform => Object is Component component ? component.transform : null;
 
         /// <summary>
-        /// A reference to the <see cref="UnityEngine.Splines.Spline"/>. This may be null if the container or index are
+        /// A reference to the <see cref="UnityEngine.YukselSplines.Spline"/>. This may be null if the container or index are
         /// invalid.
         /// </summary>
         public Spline Spline => Container != null && Index > -1 && Index < Container.Splines.Count

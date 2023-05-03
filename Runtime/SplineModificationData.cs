@@ -1,4 +1,4 @@
-namespace UnityEngine.Splines
+namespace UnityEngine.YukselSplines
 {
     /// <summary>
     /// Describes the different types of changes that can occur to a spline.

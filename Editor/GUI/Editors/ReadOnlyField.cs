@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace UnityEditor.Splines
+namespace UnityEditor.YukselSplines
 {
     sealed class ReadOnlyField : BaseField<string>
     {

@@ -1,7 +1,7 @@
 using System;
 using Unity.Mathematics;
 
-namespace UnityEngine.Splines
+namespace UnityEngine.YukselSplines
 {
     /// <summary>
     /// Control points for a cubic Bezier curve.

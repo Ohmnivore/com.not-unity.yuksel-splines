@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using UnityEngine.UIElements;
-using UnityEngine.Splines;
+using UnityEngine.YukselSplines;
 
-namespace UnityEditor.Splines
+namespace UnityEditor.YukselSplines
 {
     sealed class SplineActionButtons : VisualElement
     {

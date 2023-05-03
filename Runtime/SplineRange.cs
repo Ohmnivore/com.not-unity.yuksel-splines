@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.Mathematics;
 
-namespace UnityEngine.Splines
+namespace UnityEngine.YukselSplines
 {
     /// <summary>
     /// Describes the direction that a <see cref="SplineRange"/> interpolates. Use <see cref="SplineSlice{T}"/> and

@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
 
-namespace UnityEditor.Splines
+namespace UnityEditor.YukselSplines
 {
     static class KnotHandles
     {

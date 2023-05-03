@@ -1,7 +1,7 @@
 using System;
 using Unity.Mathematics;
 
-namespace UnityEngine.Splines
+namespace UnityEngine.YukselSplines
 {
     /// <summary>
     /// This struct contains position and tangent data for a knot. The position is a scalar point and the tangents are vectors.

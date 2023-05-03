@@ -1,11 +1,11 @@
 using UnityEngine;
-using UnityEngine.Splines;
+using UnityEngine.YukselSplines;
 
-namespace UnityEditor.Splines
+namespace UnityEditor.YukselSplines
 {
     /// <summary>
     /// A PropertyDrawer used to show a popup menu with available spline indices relative to a <see cref="ISplineContainer"/>.
-    /// Add <see cref="UnityEngine.Splines.SplineIndexAttribute"/> to a serialized integer type to use.
+    /// Add <see cref="UnityEngine.YukselSplines.SplineIndexAttribute"/> to a serialized integer type to use.
     /// </summary>
     [CustomPropertyDrawer(typeof(SplineIndexAttribute))]
     public class SplineIndexPropertyDrawer : PropertyDrawer

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Unity.Mathematics;
 
-namespace UnityEngine.Splines
+namespace UnityEngine.YukselSplines
 {
     /// <summary>
     /// To calculate a value at some distance along a spline, interpolation is required. The IInterpolator interface
@@ -129,7 +129,7 @@ namespace UnityEngine.Splines
         /// </summary>
         /// <remarks>
         /// In the editor this can be invoked many times per-frame.
-        /// Prefer to use <see cref="UnityEditor.Splines.EditorSplineUtility.RegisterSplineDataChanged"/> when working with
+        /// Prefer to use <see cref="UnityEditor.YukselSplines.EditorSplineUtility.RegisterSplineDataChanged"/> when working with
         /// splines in the editor.
         /// </remarks>
         [Obsolete("Use Changed instead.", false)]
@@ -139,7 +139,7 @@ namespace UnityEngine.Splines
         /// </summary>
         /// <remarks>
         /// In the editor this can be invoked many times per-frame.
-        /// Prefer to use <see cref="UnityEditor.Splines.EditorSplineUtility.RegisterSplineDataChanged"/> when working with
+        /// Prefer to use <see cref="UnityEditor.YukselSplines.EditorSplineUtility.RegisterSplineDataChanged"/> when working with
         /// splines in the editor.
         /// </remarks>
         public event Action Changed;
@@ -298,7 +298,7 @@ namespace UnityEngine.Splines
         /// Move a <see cref="DataPoint{T}"/> (if it exists) from this collection, from one index to the another.
         /// </summary>
         /// <param name="index">The index of the  <see cref="DataPoint{T}"/> to move. This is the index into the collection, not the PathIndexUnit.Knot.</param>
-        /// <param name="newIndex">The new index (<see cref="UnityEngine.Splines.PathIndexUnit.Knot"/>) for this <see cref="DataPoint{T}"/>.</param>
+        /// <param name="newIndex">The new index (<see cref="UnityEngine.YukselSplines.PathIndexUnit.Knot"/>) for this <see cref="DataPoint{T}"/>.</param>
         /// <returns>The index of the modified <see cref="DataPoint{T}"/>.</returns>
         /// <exception cref="ArgumentOutOfRangeException"></exception>
         public int MoveDataPoint(int index, float newIndex)
@@ -395,7 +395,7 @@ namespace UnityEngine.Splines
         /// <param name="t">The interpolator value. How this is interpreted is defined by <see cref="PathIndexUnit"/>.</param>
         /// <param name="indexUnit">The <see cref="PathIndexUnit"/> that <paramref name="t"/> is represented as.</param>
         /// <param name="interpolator">The <see cref="IInterpolator{T}"/> to use. A collection of commonly used
-        /// interpolators are available in the <see cref="UnityEngine.Splines.Interpolators"/> namespace.</param>
+        /// interpolators are available in the <see cref="UnityEngine.YukselSplines.Interpolators"/> namespace.</param>
         /// <typeparam name="TInterpolator">The IInterpolator type.</typeparam>
         /// <typeparam name="TSpline">The Spline type.</typeparam>
         /// <returns>An interpolated value.</returns>
@@ -415,7 +415,7 @@ namespace UnityEngine.Splines
         /// <param name="spline">The Spline to interpolate.</param>
         /// <param name="t">The interpolator value. How this is interpreted is defined by <see cref="PathIndexUnit"/>.</param>
         /// <param name="interpolator">The <see cref="IInterpolator{T}"/> to use. A collection of commonly used
-        /// interpolators are available in the <see cref="UnityEngine.Splines.Interpolators"/> namespace.</param>
+        /// interpolators are available in the <see cref="UnityEngine.YukselSplines.Interpolators"/> namespace.</param>
         /// <typeparam name="TInterpolator">The IInterpolator type.</typeparam>
         /// <typeparam name="TSpline">The Spline type.</typeparam>
         /// <returns>An interpolated value.</returns>
@@ -565,7 +565,7 @@ namespace UnityEngine.Splines
         // IMPORTANT - NOT PUBLIC API. See ISplineModificationHandler for more information.
         /// <summary>
         /// Attempts to preserve knot indices relative to their current position after a Spline has been modified. This
-        /// is only valid for SplineData that is indexed using <see cref="UnityEngine.Splines.PathIndexUnit.Knot"/>.
+        /// is only valid for SplineData that is indexed using <see cref="UnityEngine.YukselSplines.PathIndexUnit.Knot"/>.
         /// </summary>
         /// <remarks>
         /// This function is only valid for PathIndexUnit.Knot because other representations are (1) implicitly better

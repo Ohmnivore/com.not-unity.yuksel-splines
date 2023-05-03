@@ -1,4 +1,4 @@
-namespace UnityEditor.Splines
+namespace UnityEditor.YukselSplines
 {
     sealed class CommonElementDrawer : ElementDrawer<ISplineElement>
     {

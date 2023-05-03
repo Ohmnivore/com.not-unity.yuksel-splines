@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace UnityEngine.Splines
+namespace UnityEngine.YukselSplines
 {
     /// <summary>
     /// A key-value pair associating a distance to interpolation ratio ('t') value. This is used when evaluating Spline

@@ -3,9 +3,9 @@ using UnityEditor.Toolbars;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace UnityEditor.Splines
+namespace UnityEditor.YukselSplines
 {
-    [EditorToolbarElement("Spline Tool Settings/Handle Visuals")]
+    [EditorToolbarElement("Yuksel Spline Tool Settings/Handle Visuals")]
     sealed class SplineHandleSettingsDropdown : EditorToolbarDropdown
     {
         public SplineHandleSettingsDropdown()

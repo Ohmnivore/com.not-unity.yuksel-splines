@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace UnityEngine.Splines
+namespace UnityEngine.YukselSplines
 {
     /// <summary>
     /// A component for creating a tube mesh from a Spline at runtime.
     /// </summary>
     [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
-    [AddComponentMenu("Splines/Spline Extrude")]
+    [AddComponentMenu("Yuksel Splines/Yuksel Spline Extrude")]
     public class SplineExtrude : MonoBehaviour
     {
         [SerializeField, Tooltip("The Spline to extrude.")]

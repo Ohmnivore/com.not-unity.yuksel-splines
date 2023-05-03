@@ -1,4 +1,4 @@
-namespace UnityEngine.Splines
+namespace UnityEngine.YukselSplines
 {
     /// <summary>
     /// Describes the different ways a tool might interact with a tangent handle.

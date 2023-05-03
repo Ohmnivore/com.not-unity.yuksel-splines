@@ -2,7 +2,7 @@
 using Unity.Mathematics;
 using UnityEngine;
 
-namespace UnityEditor.Splines
+namespace UnityEditor.YukselSplines
 {
     class CurvePlacementData : PlacementData
     {

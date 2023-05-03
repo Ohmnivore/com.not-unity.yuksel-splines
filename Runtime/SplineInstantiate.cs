@@ -5,20 +5,20 @@ using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Serialization;
-using UnityEngine.Splines;
+using UnityEngine.YukselSplines;
 using Random = UnityEngine.Random;
 
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
 
-namespace UnityEngine.Splines
+namespace UnityEngine.YukselSplines
 {
     /// <summary>
     /// SplineInstantiate is used to automatically instantiate prefabs or objects along a spline.
     /// </summary>
     [ExecuteInEditMode]
-    [AddComponentMenu("Splines/Spline Instantiate")]
+    [AddComponentMenu("Yuksel Splines/Yuksel Spline Instantiate")]
     public class SplineInstantiate : SplineComponent
     {
         /// <summary>

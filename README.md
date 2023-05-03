@@ -1,27 +1,36 @@
 # About
+Based on [`com.unity.splines`](https://docs.unity3d.com/Packages/com.unity.splines@2.2/manual/index.html) version 2.2.1.
 
-This package contains a framework and tools for working with curves and splines.
+The original package provides linear, cubic Bézier, and Catmull-Rom splines. They are not [C^2-continuous](https://www.youtube.com/watch?v=jvPPXbo87ds).
 
-## Quick Start
+This fork provides [Cem Yuksel's class of C^2 interpolating splines](http://www.cemyuksel.com/research/interpolating_splines/a_class_of_c2_interpolating_splines.pdf). Only the quadratic Bézier interpolator is implemented at the moment.
 
-Splines are defined as implementing the `ISpline` interface. There are two default implementations, a mutable `Spline` class, and an immutable `NativeSpline`.
+## Note
+Only Yuksel splines are supported in this package. Support of all other types from the original package was removed to simplify the implementation. This package can be installed side by side with the original.
 
-Splines are represented in the scene using the `SplineContainer` MonoBehaviour. Multiple splines can be stored in a single container.
+# Installation
+* Install the package [from its git URL](https://docs.unity3d.com/Manual/upm-ui-giturl.html) or [from a local copy](https://docs.unity3d.com/Manual/upm-ui-local.html).
+* It doesn't depend on the `com.unity.splines` package and won't conflict if it's present
 
-Use `SplineUtility` to extract information from `ISpline` objects (ex, get a position at some interpolation).
+# Possible Improvements
+* Investigate C^1 and C^2 continuity for normals along the spline
+* Implement circular, elliptical, and hybrid interpolators
+* Shared interfaces with `com.unity.splines`
+* Shader utility functions have not been reimplemented for Yuksel splines
+* Automated tests have not been reimplemented for Yuksel splines
+* Yuksel splines and other types of splines co-existing in one package
 
-Use `Splines.cginc` to import curve data data types and HLSL functions for working with Splines.
+## Changes
+### BezierKnot
+This class hasn't been renamed to minimize changes relative the original package. It is however a Yuksel curve control point now:
 
-## Creating a Spline
+* No more concept of tangents or rotation
+* The spline doesn't necessarily pass through every control point
+* Rotation is constrained to a single axis which is the tangent of the spline at the control point
 
-The default method of creating a Spline is the draw spline tool, which is accessed through the menu `GameObject/Spline/Draw Splines Tool`. This instantiates a new `SplineContainer` in the active scene, and enters the tool. 
+### BezierCurve
+This class hasn't been renamed to minimize changes relative to the original package. It is however a Yuksel curve now:
 
-With the **Draw Splines** tool active, add points to the spline by clicking in the Scene View. Press the `Enter/Return` to end the point placement on the current spline and add points to a new spline of the same container. Press the `Escape` key to finish placing points.
-
-To edit a Spline, open the Spline Tool Context by selecting a `SplineContainer` and toggling the Tool Context (in the Scene View Tools Toolbar) to **Spline**. Then, use the Move, Rotate, Scale tools to modify spline knots and tangents.
-
-## Extending Splines
-
-Splines can be extended through inheritance, or with `SplineData<T>`. The `SplineData` class is a key value pair collection type where key corresponds to an interpolation value relative to a spline. See the API documentation for more information on working with `SplineData`.
-
-Import the **Spline Examples** scripts and scenes from the Package Manager Samples page.
+* Stores two interpolating curves and the parameters of the middle interpolating point
+* Trigonometric blend between the two interpolator curves
+* When a transformation matrix should be applied to the curve, the control points are pre-multiplied for caching

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Unity.Mathematics;
 
-namespace UnityEngine.Splines
+namespace UnityEngine.YukselSplines
 {
     // IMPORTANT:
     // SplinePathRef is the serializable equivalent of SplinePath. It is intentionally not public due to

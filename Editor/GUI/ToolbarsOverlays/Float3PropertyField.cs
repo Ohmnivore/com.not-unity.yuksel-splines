@@ -6,7 +6,7 @@ using UnityEngine.UIElements;
 using UnityEditor.UIElements;
 #endif
 
-namespace UnityEditor.Splines
+namespace UnityEditor.YukselSplines
 {
     class Float3PropertyField<T> : Vector3Field
         where T : ISplineElement

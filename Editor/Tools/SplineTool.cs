@@ -5,7 +5,7 @@ using UnityEditor.EditorTools;
 using UnityEngine;
 using UnityEditor.SettingsManagement;
 using UnityEditor.ShortcutManagement;
-using UnityEngine.Splines;
+using UnityEngine.YukselSplines;
 #if UNITY_2022_1_OR_NEWER
 using UnityEditor.Overlays;
 #else
@@ -14,7 +14,7 @@ using UnityEditor.Toolbars;
 using UnityEngine.UIElements;
 #endif
 
-namespace UnityEditor.Splines
+namespace UnityEditor.YukselSplines
 {
     /// <summary>
     /// Describes how the handles are oriented.
@@ -53,9 +53,9 @@ namespace UnityEditor.Splines
             get
             {
                 yield return "Tool Settings/Pivot Mode";
-                yield return "Spline Tool Settings/Handle Rotation";
+                yield return "Yuksel Spline Tool Settings/Handle Rotation";
 #if !UNITY_2022_1_OR_NEWER
-                yield return "Spline Tool Settings/Handle Visuals";
+                yield return "Yuksel Spline Tool Settings/Handle Visuals";
 #endif
             }
         }
@@ -197,14 +197,14 @@ namespace UnityEditor.Splines
             }
         }
 
-        [Shortcut("Splines/Cycle Tangent Mode", typeof(SceneView), KeyCode.C)]
+        [Shortcut("Yuksel Splines/Cycle Tangent Mode", typeof(SceneView), KeyCode.C)]
         static void ShortcutCycleTangentMode(ShortcutArguments args)
         {
             if (activeTool != null)
                 CycleTangentMode();
         }
 
-        [Shortcut("Splines/Toggle Manipulation Space", typeof(SceneView), KeyCode.X)]
+        [Shortcut("Yuksel Splines/Toggle Manipulation Space", typeof(SceneView), KeyCode.X)]
         static void ShortcutCycleHandleOrientation(ShortcutArguments args)
         {
             /* We're doing a switch here (instead of handleOrientation+1 and wrapping) because HandleOrientation.Global/Local values map

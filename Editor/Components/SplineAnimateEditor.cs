@@ -1,12 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine.Splines;
+using UnityEngine.YukselSplines;
 using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace UnityEditor.Splines
+namespace UnityEditor.YukselSplines
 {
     [CustomEditor(typeof(SplineAnimate))]
     [CanEditMultipleObjects]
@@ -30,7 +30,7 @@ namespace UnityEditor.Splines
 
         SplineAnimate m_SplineAnimate;
 
-        const string k_UxmlPath = "Packages/com.unity.splines/Editor/Resources/UI/UXML/splineanimate-inspector.uxml";
+        const string k_UxmlPath = "Packages/com.not-unity.yuksel-splines/Editor/Resources/UI/UXML/splineanimate-inspector.uxml";
         static VisualTreeAsset s_TreeAsset;
         static StyleSheet s_ThemeStyleSheet;
 
@@ -140,7 +140,7 @@ namespace UnityEditor.Splines
             s_TreeAsset.CloneTree(m_Root);
 
             if (s_ThemeStyleSheet == null)
-                s_ThemeStyleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>($"Packages/com.unity.splines/Editor/Stylesheets/SplineAnimateInspector{(EditorGUIUtility.isProSkin ? "Dark" : "Light")}.uss");
+                s_ThemeStyleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>($"Packages/com.not-unity.yuksel-splines/Editor/Stylesheets/SplineAnimateInspector{(EditorGUIUtility.isProSkin ? "Dark" : "Light")}.uss");
 
             m_Root.styleSheets.Add(s_ThemeStyleSheet);
 

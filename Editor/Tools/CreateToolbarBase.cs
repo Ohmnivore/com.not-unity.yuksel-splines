@@ -7,7 +7,7 @@ using UnityEditor.Toolbars;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace UnityEditor.Splines
+namespace UnityEditor.YukselSplines
 {
     abstract class CreateToolbarBase : UnityEditor.Editor
     {

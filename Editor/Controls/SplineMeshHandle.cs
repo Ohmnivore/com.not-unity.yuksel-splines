@@ -1,9 +1,9 @@
 using System;
 using UnityEngine;
-using UnityEngine.Splines;
+using UnityEngine.YukselSplines;
 using Object = UnityEngine.Object;
 
-namespace UnityEditor.Splines
+namespace UnityEditor.YukselSplines
 {
     /// <summary>
     /// Creates a cylinder mesh along a spline.

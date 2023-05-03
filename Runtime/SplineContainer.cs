@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using Unity.Mathematics;
 
-namespace UnityEngine.Splines
+namespace UnityEngine.YukselSplines
 {
     /// <summary>
     /// A component that holds a <see cref="Spline"/> object.
@@ -11,11 +11,11 @@ namespace UnityEngine.Splines
 #if UNITY_2021_2_OR_NEWER
     [Icon(k_IconPath)]
 #endif
-    [AddComponentMenu("Splines/Spline")]
+    [AddComponentMenu("Yuksel Splines/Yuksel Spline")]
     [ExecuteInEditMode]
     public sealed class SplineContainer : MonoBehaviour, ISplineContainer, ISerializationCallbackReceiver
     {
-        const string k_IconPath = "Packages/com.unity.splines/Editor/Resources/Icons/SplineComponent.png";
+        const string k_IconPath = "Packages/com.not-unity.yuksel-splines/Editor/Resources/Icons/SplineComponent.png";
 
         // Keeping a main spline to be backwards compatible with older versions of the spline package
         [SerializeField, Obsolete, HideInInspector]

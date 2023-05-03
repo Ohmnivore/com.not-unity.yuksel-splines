@@ -1,13 +1,13 @@
 using Unity.Mathematics;
-using UnityEngine.Splines;
+using UnityEngine.YukselSplines;
 using UnityEngine;
 using UnityEditor.EditorTools;
 
-namespace UnityEditor.Splines
+namespace UnityEditor.YukselSplines
 {
     static class SplineMenu
     {
-        const string k_MenuPath = "GameObject/Spline";
+        const string k_MenuPath = "GameObject/Yuksel Spline";
 
         internal static GameObject CreateSplineGameObject(MenuCommand menuCommand, Spline spline = null)
         {

@@ -1,6 +1,6 @@
 using System;
 
-namespace UnityEngine.Splines
+namespace UnityEngine.YukselSplines
 {
     /// <summary>
     /// Describes the different supported Spline representations.

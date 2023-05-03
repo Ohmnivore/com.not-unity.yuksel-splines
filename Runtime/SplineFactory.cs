@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using Unity.Mathematics;
 
-namespace UnityEngine.Splines
+namespace UnityEngine.YukselSplines
 {
     /// <summary>
     /// Methods to create spline shapes.

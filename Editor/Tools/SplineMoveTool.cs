@@ -1,8 +1,8 @@
 using UnityEditor.EditorTools;
 using UnityEngine;
-using UnityEngine.Splines;
+using UnityEngine.YukselSplines;
 
-namespace UnityEditor.Splines
+namespace UnityEditor.YukselSplines
 {
     [CustomEditor(typeof(SplineMoveTool))]
     class SplineMoveToolSettings : SplineToolSettings { }

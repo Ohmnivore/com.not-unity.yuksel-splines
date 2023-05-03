@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace UnityEditor.Splines
+namespace UnityEditor.YukselSplines
 {
     static class PathIcons
     {
