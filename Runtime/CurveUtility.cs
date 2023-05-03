@@ -28,15 +28,7 @@ namespace UnityEngine.YukselSplines
         public static float3 EvaluatePosition(BezierCurve curve,  float t)
         {
             t = math.clamp(t, 0, 1);
-            var t2 = t * t;
-            var t3 = t2 * t;
-            var position =
-                curve.P0 * ( -1f * t3 + 3f * t2 - 3f * t + 1f ) +
-                curve.P1 * (  3f * t3 - 6f * t2 + 3f * t) +
-                curve.P2 * ( -3f * t3 + 3f * t2) +
-                curve.P3 * (       t3 );
-
-            return position;
+            return curve.EvaluatePosition(t);
         }
 
         /// <summary>
@@ -48,15 +40,7 @@ namespace UnityEngine.YukselSplines
         public static float3 EvaluateTangent(BezierCurve curve, float t)
         {
             t = math.clamp(t, 0, 1);
-            float t2 = t * t;
-
-            var tangent =
-                curve.P0 * ( -3f * t2 +  6f * t - 3f ) +
-                curve.P1 * (  9f * t2 - 12f * t + 3f) +
-                curve.P2 * ( -9f * t2 +  6f * t ) +
-                curve.P3 * (  3f * t2 );
-
-            return tangent;
+            return curve.EvaluateTangent(t);
         }
 
         /// <summary>
@@ -68,14 +52,7 @@ namespace UnityEngine.YukselSplines
         public static float3 EvaluateAcceleration(BezierCurve curve,  float t)
         {
             t = math.clamp(t, 0, 1);
-
-            var acceleration =
-                curve.P0 * ( -6f * t + 6f ) +
-                curve.P1 * ( 18f * t - 12f) +
-                curve.P2 * (-18f * t + 6f ) +
-                curve.P3 * (  6f * t );
-
-            return acceleration;
+            return curve.EvaluateAcceleration(t);
         }
 
         /// <summary>
@@ -99,53 +76,6 @@ namespace UnityEngine.YukselSplines
                 / ( firstDerivativeNormSq * math.length(firstDerivative));
 
             return kappa;
-        }
-
-        /// <summary>
-        /// Given a Bezier curve, return an interpolated position at ratio t.
-        /// </summary>
-        /// <param name="curve">A cubic Bezier curve.</param>
-        /// <param name="t">A value between 0 and 1 representing the ratio along the curve.</param>
-        /// <returns>A position on the curve.</returns>
-        static float3 DeCasteljau(BezierCurve curve, float t)
-        {
-            float3 p0 = curve.P0, p1 = curve.P1;
-            float3 p2 = curve.P2, p3 = curve.P3;
-
-            float3 a0 = math.lerp(p0, p1, t);
-            float3 a1 = math.lerp(p1, p2, t);
-            float3 a2 = math.lerp(p2, p3, t);
-            float3 b0 = math.lerp(a0, a1, t);
-            float3 b1 = math.lerp(a1, a2, t);
-
-            return math.lerp(b0, b1, t);
-        }
-
-        /// <summary>
-        /// Decompose a curve into two smaller curves matching the source curve.
-        /// </summary>
-        /// <param name="curve">The source curve.</param>
-        /// <param name="t">A mid-point on the source curve defining where the two smaller curves control points meet.</param>
-        /// <param name="left">A curve from the source curve first control point to the mid-point, matching the curvature of the source curve.</param>
-        /// <param name="right">A curve from the mid-point to the source curve fourth control point, matching the curvature of the source curve.</param>
-        public static void Split(BezierCurve curve, float t, out BezierCurve left, out BezierCurve right)
-        {
-            t = math.clamp(t, 0f, 1f);
-
-            // subdivide control points, first iteration
-            float3 split0 = math.lerp(curve.P0, curve.P1, t);
-            float3 split1 = math.lerp(curve.P1, curve.P2, t);
-            float3 split2 = math.lerp(curve.P2, curve.P3, t);
-
-            // subdivide control points, second iteration
-            float3 split3 = math.lerp(split0, split1, t);
-            float3 split4 = math.lerp(split1, split2, t);
-
-            // subdivide control points, third iteration
-            float3 split5 = math.lerp(split3, split4, t);
-
-            left = new BezierCurve(curve.P0, split0, split3, split5);
-            right = new BezierCurve(split5, split4, split2, curve.P3);
         }
 
         /// <summary>
@@ -217,27 +147,17 @@ namespace UnityEngine.YukselSplines
         /// <returns>An estimate of the length of a curve.</returns>
         public static float ApproximateLength(BezierCurve curve)
         {
-            float chord = math.length(curve.P3 - curve.P0);
-            float net = math.length(curve.P0 - curve.P1) + math.length(curve.P2 - curve.P1) + math.length(curve.P3 - curve.P2);
-            return (net + chord) / 2;
+            return curve.ApproximateLength();
         }
 
         internal static float3 EvaluateUpVector(BezierCurve curve, float t, float3 startUp, float3 endUp)
         {
-            // Ensure we have workable tangents by linearizing ones that are of zero length
-            var linearTangentLen = math.length(SplineUtility.GetExplicitLinearTangent(curve.P0, curve.P3));
-            var linearTangentOut = math.normalize(curve.P3 - curve.P0) * linearTangentLen;
-            if (Approximately(math.length(curve.P1 - curve.P0), 0f)) 
-                curve.P1 = curve.P0 + linearTangentOut;
-            if (Approximately(math.length(curve.P2 - curve.P3), 0f))
-                curve.P2 = curve.P3 - linearTangentOut;
-
             var normalBuffer = new NativeArray<float3>(k_NormalsPerCurve, Allocator.Temp);
             
             // Construct initial frenet frame
             FrenetFrame frame;
-            frame.origin = curve.P0;
-            frame.tangent = curve.P1 - curve.P0;
+            frame.origin = curve.EvaluatePosition(0f);
+            frame.tangent = curve.EvaluateTangent(0f);
             frame.normal = startUp;
             frame.binormal = math.normalize(math.cross(frame.tangent, frame.normal));
             normalBuffer[0] = frame.normal;

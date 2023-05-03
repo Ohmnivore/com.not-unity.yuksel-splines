@@ -55,43 +55,5 @@ namespace UnityEditor.YukselSplines
             ToolManager.SetActiveContext<SplineToolContext>();
             ToolManager.SetActiveTool<KnotPlacementTool>();
         }
-
-        [MenuItem(k_MenuPath + "/Square", false, k_MenuPriority + 11)]
-        static void CreateSquare(MenuCommand command)
-        {
-            CreateSplineGameObject(command, SplineFactory.CreateSquare(1f));
-        }
-
-        [MenuItem(k_MenuPath + "/Rounded Square", false, k_MenuPriority + 12)]
-        static void CreateRoundedSquare(MenuCommand command)
-        {
-            CreateSplineGameObject(command, SplineFactory.CreateRoundedCornerSquare(1f, 0.25f));
-        }
-
-        [MenuItem(k_MenuPath + "/Circle", false, k_MenuPriority + 13)]
-        static void CreateCircle(MenuCommand command)
-        {
-            CreateSplineGameObject(command, SplineFactory.CreateCircle(0.5f));
-        }
-
-        [MenuItem(k_MenuPath + "/Polygon", false, k_MenuPriority + 14)]
-        static void CreatePolygon(MenuCommand command)
-        {
-            var edgeSize = math.sin(math.PI / 6f);
-            CreateSplineGameObject(command, SplineFactory.CreatePolygon(edgeSize, 6));
-        }
-
-        [MenuItem(k_MenuPath + "/Helix", false, k_MenuPriority + 15)]
-        static void CreateHelix(MenuCommand command)
-        {
-            CreateSplineGameObject(command, SplineFactory.CreateHelix(0.5f, 1f, 1));
-        }
-
-        [MenuItem(k_MenuPath + "/Star", false, k_MenuPriority + 16)]
-        static void CreateStar(MenuCommand command)
-        {
-            var edgeSize = math.sin(math.PI / 5f);
-            CreateSplineGameObject(command, SplineFactory.CreateStarPolygon(edgeSize, 5, 0.5f));
-        }
     }
 }

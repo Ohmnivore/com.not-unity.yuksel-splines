@@ -16,28 +16,12 @@ namespace UnityEditor.YukselSplines
         static readonly List<float> s_LengthBuffer = new List<float>(0);
         static readonly SplineGUIUtility.EqualityComparer<float> s_MagnitudeComparer = (a, b) => a.Equals(b);
 
-        readonly TangentModePropertyField<SelectableTangent> m_Mode;
-        readonly BezierTangentPropertyField<SelectableTangent> m_BezierMode;
-
         FloatField m_Magnitude;
         Float3PropertyField<SelectableTangent> m_Direction;
 
         public TangentDrawer()
         {
             AddToClassList(k_TangentDrawerStyle);
-
-            Add(m_Mode = new TangentModePropertyField<SelectableTangent>());
-            m_Mode.changed += () =>
-            {
-                m_BezierMode.Update(targets);
-                EnableElements();
-            };
-            Add(m_BezierMode = new BezierTangentPropertyField<SelectableTangent>());
-            m_BezierMode.changed += () =>
-            {
-                m_Mode.Update(targets);
-                EnableElements();
-            };
 
             CreateTangentFields();
 
@@ -71,9 +55,6 @@ namespace UnityEditor.YukselSplines
         public override void Update()
         {
             base.Update();
-
-            m_Mode.Update(targets);
-            m_BezierMode.Update(targets);
 
             UpdateMagnitudeField(targets);
             m_Direction.Update(targets);
@@ -123,12 +104,6 @@ namespace UnityEditor.YukselSplines
         {
             bool tangentsModifiable = true;
             bool tangentsBroken = true;
-            for (int i = 0; i < targets.Count; ++i)
-            {
-                var mode = targets[i].Owner.Mode;
-                tangentsModifiable &= SplineUtility.AreTangentsModifiable(mode);
-                tangentsBroken &= mode == TangentMode.Broken;
-            }
 
             m_Direction.SetEnabled(tangentsModifiable && tangentsBroken);
             m_Magnitude.SetEnabled(tangentsModifiable);

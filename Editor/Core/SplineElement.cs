@@ -59,29 +59,6 @@ namespace UnityEditor.YukselSplines
             }
         }
 
-        public TangentMode Mode
-        {
-            get => SplineInfo.Spline.GetTangentMode(KnotIndex);
-            set
-            {
-                SplineInfo.Spline.SetTangentMode(KnotIndex, value);
-                SplineSelectionUtility.ValidateTangentSelection(this);
-            }
-        }
-
-        public float Tension
-        {
-            get => SplineInfo.Spline.GetAutoSmoothTension(KnotIndex);
-            set => SplineInfo.Spline.SetAutoSmoothTension(KnotIndex, value);
-        }
-
-        public void SetTangentMode(TangentMode mode, BezierTangent main)
-        {
-            var spline = SplineInfo.Spline;
-            spline.SetTangentMode(KnotIndex, mode, main);
-            SplineSelectionUtility.ValidateTangentSelection(this);
-        }
-
         public SelectableTangent TangentIn => new SelectableTangent(SplineInfo, KnotIndex, BezierTangent.In);
         public SelectableTangent TangentOut => new SelectableTangent(SplineInfo, KnotIndex, BezierTangent.Out);
 
@@ -134,9 +111,7 @@ namespace UnityEditor.YukselSplines
                 && KnotIndex >= 0
                 && KnotIndex < SplineInfo.Spline.Count
                 && TangentIndex >= 0
-                && TangentIndex < 2
-                && Owner.Mode != TangentMode.Linear
-                && Owner.Mode != TangentMode.AutoSmooth;
+                && TangentIndex < 2;
         }
 
         public float3 Direction

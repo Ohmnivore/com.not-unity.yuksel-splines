@@ -21,7 +21,7 @@ namespace UnityEditor.YukselSplines
         [SettingsProvider]
         static SettingsProvider CreateSettingsProvider()
         {
-            var provider = new UserSettingsProvider("Preferences/Splines",
+            var provider = new UserSettingsProvider("Preferences/Yuksel Splines",
                 instance,
                 new[] { typeof(PathSettings).Assembly });
 

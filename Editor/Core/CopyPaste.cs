@@ -22,14 +22,10 @@ namespace UnityEditor.YukselSplines
         struct SerializedKnot
         {
             public BezierKnot Knot;
-            public TangentMode Mode;
-            public float Tension;
 
             public SerializedKnot(SelectableKnot knot)
             {
                 Knot = knot.GetBezierKnot(false);
-                Mode = knot.Mode;
-                Tension = knot.Tension;
             }
         }
 
@@ -271,7 +267,7 @@ namespace UnityEditor.YukselSplines
                 branches.Add(spline);
                 for (int i = 0, c = knots.Length; i < c; ++i)
                 {
-                    spline.Add(knots[i].Knot.Transform(math.mul(inverse, trs)), knots[i].Mode, knots[i].Tension);
+                    spline.Add(knots[i].Knot.Transform(math.mul(inverse, trs)));
                     selection.Add(new SelectableKnot(info, i));
                 }
             }

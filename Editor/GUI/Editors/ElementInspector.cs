@@ -18,7 +18,6 @@ namespace UnityEditor.YukselSplines
         readonly VisualElement m_SplineDrawerRoot;
 
         IElementDrawer m_ElementDrawer;
-        readonly CommonElementDrawer m_CommonElementDrawer = new CommonElementDrawer();
         readonly BezierKnotDrawer m_BezierKnotDrawer = new BezierKnotDrawer();
         readonly TangentDrawer m_TangentDrawer = new TangentDrawer();
 
@@ -86,9 +85,7 @@ namespace UnityEditor.YukselSplines
             bool hasTangent = SplineSelection.HasAny<SelectableTangent>(selectedSplines);
 
             IElementDrawer targetDrawer;
-            if (hasKnot && hasTangent)
-                targetDrawer = m_CommonElementDrawer; 
-            else if (hasKnot)
+            if (hasKnot)
                 targetDrawer = m_BezierKnotDrawer;
             else if (hasTangent)
                 targetDrawer = m_TangentDrawer;

@@ -63,7 +63,7 @@ namespace UnityEditor.YukselSplines
         {
             var knotToTangentDirection = position - knotPosition;
             var rotation = quaternion.LookRotationSafe(knotToTangentDirection, normal);
-            Draw(-1, position, rotation, knotPosition, false, false, false, TangentMode.Broken, active);
+            Draw(-1, position, rotation, knotPosition, false, false, false, active);
         }
 
         public static void Draw(int controlId, SelectableTangent tangent, bool active = true)
@@ -77,11 +77,10 @@ namespace UnityEditor.YukselSplines
                 SplineSelection.Contains(tangent),
                 SplineSelection.Contains(tangent.OppositeTangent),
                 SplineHandleUtility.IsLastHoveredElement(tangent.OppositeTangent),
-                owner.Mode,
                 active);
         }
 
-        public static void Draw(int controlId, Vector3 position, Quaternion rotation, Vector3 knotPosition, bool selected, bool oppositeSelected, bool oppositeHovered, TangentMode mode, bool active)
+        public static void Draw(int controlId, Vector3 position, Quaternion rotation, Vector3 knotPosition, bool selected, bool oppositeSelected, bool oppositeHovered, bool active)
         {
             if (Event.current.type != EventType.Repaint)
                 return;
@@ -115,21 +114,6 @@ namespace UnityEditor.YukselSplines
                 tangentColor;
 #endif
 
-            if (mode == TangentMode.Mirrored)
-            {
-#if UNITY_2022_2_OR_NEWER
-                if(oppositeHovered)
-                    tangentArmColor = Handles.elementPreselectionColor;
-                else if(tangentArmColor == SplineHandleUtility.tangentColor && oppositeSelected)
-                    tangentArmColor = Handles.elementSelectionColor;
-#else
-                if(oppositeHovered)
-                    tangentArmColor = Handles.preselectionColor;
-                else if(tangentArmColor == SplineHandleUtility.tangentColor && oppositeSelected)
-                    tangentArmColor = Handles.selectedColor;
-#endif
-            }
-
             var rotationDiscWidth = k_TangentRotWidthDefault;
             if (hovered)
                 rotationDiscWidth = k_TangentRotDiscWidth;
@@ -138,7 +122,7 @@ namespace UnityEditor.YukselSplines
             {
                 // Draw tangent arm.
                 using (new ColorScope(tangentArmColor))
-                    DrawTangentArm(position, knotPosition, size, mode, selected, hovered, oppositeSelected, oppositeHovered);
+                    DrawTangentArm(position, knotPosition, size, selected, hovered, oppositeSelected, oppositeHovered);
 
                 // Draw tangent shape.
                 using (new Handles.DrawingScope(tangentColor, Matrix4x4.TRS(position, rotation, Vector3.one)))
@@ -150,7 +134,7 @@ namespace UnityEditor.YukselSplines
                 // Draw tangent arm.
                 var newTangentArmColor = new Color(tangentArmColor.r, tangentArmColor.g, tangentArmColor.b, tangentArmColor.a * k_ColorAlphaFactor);
                 using (new ColorScope(newTangentArmColor))
-                    DrawTangentArm(position, knotPosition, size, mode, selected, hovered, oppositeSelected, oppositeHovered);
+                    DrawTangentArm(position, knotPosition, size, selected, hovered, oppositeSelected, oppositeHovered);
 
                 // Draw tangent shape.
                 var newDiscColor = new Color(tangentColor.r, tangentColor.g, tangentColor.b, tangentColor.a * k_ColorAlphaFactor);
@@ -177,14 +161,14 @@ namespace UnityEditor.YukselSplines
             }
         }
 
-        static void DrawTangentArm(Vector3 position, Vector3 knotPosition, float size, TangentMode mode, bool selected, bool hovered, bool oppositeSelected, bool oppositeHovered)
+        static void DrawTangentArm(Vector3 position, Vector3 knotPosition, float size, bool selected, bool hovered, bool oppositeSelected, bool oppositeHovered)
         {
             var width = k_TangentLineWidthDefault;
             if (!DirectManipulation.IsDragging)
             {
-                if (selected || (mode != TangentMode.Broken && oppositeSelected))
+                if (selected)
                     width = k_TangentLineWidthSelected;
-                else if (hovered || (mode != TangentMode.Broken && oppositeHovered))
+                else if (hovered)
                     width = k_TangentLineWidthHover;
             }
 

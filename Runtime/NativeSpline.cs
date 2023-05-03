@@ -152,21 +152,26 @@ namespace UnityEngine.YukselSplines
 
             if (knots.Count > 0)
             {
-                BezierKnot cur = knots[0].Transform(transform);
                 for (int i = 0; i < kc; ++i)
                 {
-                    BezierKnot next = knots[(i + 1) % kc].Transform(transform);
-                    m_Knots[i] = cur;
+                    var p = knots[i];
+                    p = p.Transform(transform);
+                    m_Knots[i] = p;
+                }
 
+                for (int i = 0; i < kc; ++i)
+                {
                     if (splits != null && splits.Contains(i))
                     {
-                        m_Curves[i] = new BezierCurve(new BezierKnot(cur.Position), new BezierKnot(cur.Position));
+                        var p = m_Knots[i];
+                        m_Curves[i] = new BezierCurve(p, p, p, p);
                         for (int n = 0; n < k_SegmentResolution; ++n)
                             distanceToTimes[n] = new DistanceToInterpolation();
                     }
                     else
                     {
-                        m_Curves[i] = new BezierCurve(cur, next);
+                        var indices = Spline.GetCurveKnotIndicesForIndex(i, m_Knots.Length, m_Closed);
+                        m_Curves[i] = new BezierCurve(m_Knots[indices.p0], m_Knots[indices.p1], m_Knots[indices.p2], m_Knots[indices.p3]);
                         CurveUtility.CalculateCurveLengths(m_Curves[i], distanceToTimes);
                     }
 
@@ -175,8 +180,6 @@ namespace UnityEngine.YukselSplines
 
                     for (int distanceToTimeIndex = 0; distanceToTimeIndex < k_SegmentResolution; distanceToTimeIndex++)
                         m_SegmentLengthsLookupTable[i * k_SegmentResolution + distanceToTimeIndex] = distanceToTimes[distanceToTimeIndex];
-
-                    cur = next;
                 }
             }
         }

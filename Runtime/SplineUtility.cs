@@ -1586,10 +1586,5 @@ namespace UnityEngine.YukselSplines
             var rdp = new RamerDouglasPeucker<T>(line);
             rdp.Reduce(results, epsilon);
         }
-        
-        internal static bool AreTangentsModifiable(TangentMode mode)
-        {
-            return mode == TangentMode.Broken || mode == TangentMode.Continuous || mode == TangentMode.Mirrored;
-        }
     }
 }

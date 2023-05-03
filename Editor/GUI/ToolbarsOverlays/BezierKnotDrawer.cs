@@ -14,8 +14,6 @@ namespace UnityEditor.YukselSplines
 
         readonly Float3PropertyField<SelectableKnot> m_Position;
         readonly Float3PropertyField<SelectableKnot> m_Rotation;
-        readonly TangentModePropertyField<SelectableKnot> m_Mode;
-        readonly BezierTangentPropertyField<SelectableKnot> m_BezierMode;
         readonly TangentPropertyField m_TangentIn;
         readonly TangentPropertyField m_TangentOut;
 
@@ -46,12 +44,6 @@ namespace UnityEditor.YukselSplines
 
             Add(new Separator());
 
-            Add(m_Mode = new TangentModePropertyField<SelectableKnot>());
-            m_Mode.changed += Update;
-
-            Add(m_BezierMode = new BezierTangentPropertyField<SelectableKnot>());
-            m_BezierMode.changed += Update;
-
             Add(m_TangentIn = new TangentPropertyField("In", "TangentIn", BezierTangent.In));
             Add(m_TangentOut = new TangentPropertyField("Out", "TangentOut", BezierTangent.Out));
 
@@ -77,9 +69,6 @@ namespace UnityEditor.YukselSplines
             m_Position.Update(targets);
             m_Rotation.Update(targets);
 
-            m_Mode.Update(targets);
-            m_BezierMode.Update(targets);
-
             m_TangentIn.Update(targets);
             m_TangentOut.Update(targets);
             
@@ -95,9 +84,6 @@ namespace UnityEditor.YukselSplines
             bool tangentOutSelectable = false;
             for (int i = 0; i < targets.Count; ++i)
             {
-                var mode = targets[i].Mode;
-                tangentsModifiable &= SplineUtility.AreTangentsModifiable(mode);
-                tangentsBroken &= mode == TangentMode.Broken;
                 tangentInSelectable |= SplineSelectionUtility.IsSelectable(targets[i].TangentIn);
                 tangentOutSelectable |= SplineSelectionUtility.IsSelectable(targets[i].TangentOut);
             }

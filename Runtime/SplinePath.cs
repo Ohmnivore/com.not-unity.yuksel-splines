@@ -253,11 +253,12 @@ namespace UnityEngine.YukselSplines
             if (IsDegenerate(knot))
             {
                 var point = new BezierKnot(this[index].Position);
-                return new BezierCurve(point, point);
+                return new BezierCurve(point, point, point, point);
             }
 
-            BezierKnot a = this[index], b = this.Next(knot);
-            return new BezierCurve(a, b);
+            var spline = m_Splines[index.Spline];
+            var points = Spline.GetCurveKnotIndicesForIndex(index.Knot, spline.Count, spline.Closed);
+            return new BezierCurve(points.p0, points.p1, points.p2, points.p3);
         }
 
         /// <summary>

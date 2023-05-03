@@ -294,14 +294,14 @@ namespace UnityEditor.YukselSplines
 
                 if(knot.KnotIndex > 0 || spline.Closed)
                 {
-                    var curve = spline.GetCurve(spline.PreviousIndex(knot.KnotIndex)).Transform(localToWorld);
+                    var curve = spline.GetCurve(spline.PreviousIndex(knot.KnotIndex), localToWorld);
                     var curveMiddleT = GetCurveMiddleInterpolation(curve, spline, spline.PreviousIndex(knot.KnotIndex));
                     DrawCurveHighlight(curve, 1f, curveMiddleT);
                 }
 
                 if(knot.KnotIndex < spline.Count - 1  || spline.Closed)
                 {
-                    var curve = spline.GetCurve(knot.KnotIndex).Transform(localToWorld);
+                    var curve = spline.GetCurve(knot.KnotIndex, localToWorld);
                     var curveMiddleT = GetCurveMiddleInterpolation(curve, spline, knot.KnotIndex);
                     DrawCurveHighlight(curve, 0f, curveMiddleT);
                 }
@@ -349,28 +349,6 @@ namespace UnityEditor.YukselSplines
 
                 Handles.color = color;
             }
-        }
-
-        /// <summary>
-        /// Creates the set of control points that make up a curve.
-        /// </summary>
-        /// <param name="curve">The <see cref="BezierCurve"/> to create control points for.</param>
-
-        public static void DrawControlNet(BezierCurve curve)
-        {
-            Handles.color = Color.green;
-            Handles.DotHandleCap(-1, curve.P0, Quaternion.identity, HandleUtility.GetHandleSize(curve.P0) * .04f, Event.current.type);
-            Handles.color = Color.red;
-            Handles.DotHandleCap(-1, curve.P1, Quaternion.identity, HandleUtility.GetHandleSize(curve.P1) * .04f, Event.current.type);
-            Handles.color = Color.yellow;
-            Handles.DotHandleCap(-1, curve.P2, Quaternion.identity, HandleUtility.GetHandleSize(curve.P2) * .04f, Event.current.type);
-            Handles.color = Color.blue;
-            Handles.DotHandleCap(-1, curve.P3, Quaternion.identity, HandleUtility.GetHandleSize(curve.P3) * .04f, Event.current.type);
-
-            Handles.color = Color.gray;
-            Handles.DrawDottedLine(curve.P0, curve.P1, 2f);
-            Handles.DrawDottedLine(curve.P1, curve.P2, 2f);
-            Handles.DrawDottedLine(curve.P2, curve.P3, 2f);
         }
     }
 }

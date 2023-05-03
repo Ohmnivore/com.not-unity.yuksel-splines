@@ -128,24 +128,11 @@ namespace UnityEditor.YukselSplines
             if (guiChanged && m_Spline != null)
             {
                 serializedObject.ApplyModifiedProperties();
-                m_Spline.EnforceTangentModeNoNotify(m_Spline.PreviousIndex(i));
-                m_Spline.EnforceTangentModeNoNotify(i);
-                m_Spline.EnforceTangentModeNoNotify(m_Spline.NextIndex(i));
                 m_Spline.SetDirty(SplineModification.KnotModified, i);
 
                 // delay repaint because SplineCacheUtility is only clearing it's cache on Spline.afterSplineWasModified
                 EditorApplication.delayCall += SceneView.RepaintAll;
             }
-        }
-
-        static void EnforceTangentModeWithNeighbors(Spline spline, int index)
-        {
-            if (spline == null)
-                return;
-            int p = spline.PreviousIndex(index), n = spline.NextIndex(index);
-            spline.EnforceTangentModeNoNotify(index);
-            if(p != index) spline.EnforceTangentModeNoNotify(p);
-            if(n != index) spline.EnforceTangentModeNoNotify(n);
         }
 
         void OnReorder(ReorderableList reorderableList, int srcIndex, int dstIndex)
@@ -159,8 +146,6 @@ namespace UnityEditor.YukselSplines
                 serializedObject.Update();
             }
 
-            EnforceTangentModeWithNeighbors(m_Spline, srcIndex);
-            EnforceTangentModeWithNeighbors(m_Spline, dstIndex);
             m_Spline?.SetDirty(SplineModification.KnotReordered, dstIndex);
         }
 

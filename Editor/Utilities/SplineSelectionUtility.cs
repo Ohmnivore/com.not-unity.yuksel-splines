@@ -9,15 +9,6 @@ namespace UnityEditor.YukselSplines
     {
         static readonly List<SelectableKnot> s_KnotBuffer = new List<SelectableKnot>();
 
-        internal static void ValidateTangentSelection(SelectableKnot knot)
-        {
-            if (!SplineUtility.AreTangentsModifiable(knot.Mode))
-            {
-                SplineSelection.Remove(knot.TangentIn);
-                SplineSelection.Remove(knot.TangentOut);
-            }
-        }
-
         internal static void HandleSelection<T>(T element, bool addLinkedKnots = true)
             where T : struct, ISplineElement
         {
@@ -104,7 +95,7 @@ namespace UnityEditor.YukselSplines
 
                 if(k.KnotIndex > 0)
                 {
-                    var curve = spline.GetCurve(k.KnotIndex - 1).Transform(localToWorld);
+                    var curve = spline.GetCurve(k.KnotIndex - 1, localToWorld);
                     dist = CurveHandles.DistanceToCurve(curve);
                     if(dist < minDist)
                     {
@@ -115,7 +106,7 @@ namespace UnityEditor.YukselSplines
 
                 if(k.KnotIndex < spline.Count - 1)
                 {
-                    var curve = spline.GetCurve(k.KnotIndex).Transform(localToWorld);
+                    var curve = spline.GetCurve(k.KnotIndex, localToWorld);
                     dist = CurveHandles.DistanceToCurve(curve);
                     if(dist < minDist)
                     {
@@ -130,10 +121,6 @@ namespace UnityEditor.YukselSplines
 
         internal static bool IsSelectable(SelectableTangent tangent)
         {
-            // Tangents should not be selectable if not modifiable
-            if(!SplineUtility.AreTangentsModifiable(tangent.Owner.Mode))
-                return false;
-
             // For open splines, tangentIn of first knot and tangentOut of last knot should not be selectable
             switch (tangent.TangentIndex)
             {

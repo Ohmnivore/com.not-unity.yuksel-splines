@@ -159,51 +159,6 @@ namespace UnityEditor.YukselSplines
             TransformOperation.UpdateSelection(targets);
         }
 
-        static void CycleTangentMode()
-        {
-            var elementSelection = TransformOperation.elementSelection;
-            foreach (var element in elementSelection)
-            {
-                var knot = EditorSplineUtility.GetKnot(element);
-                if (element is SelectableTangent tangent)
-                {
-                    //Do nothing on the tangent if the knot is also in the selection
-                    if (elementSelection.Contains(tangent.Owner))
-                        continue;
-
-                    bool oppositeTangentSelected = elementSelection.Contains(tangent.OppositeTangent);
-
-                    if (!oppositeTangentSelected)
-                    {
-                        var newMode = default(TangentMode);
-                        var previousMode = knot.Mode;
-
-                        if(!SplineUtility.AreTangentsModifiable(previousMode))
-                            continue;
-
-                        if(previousMode == TangentMode.Mirrored)
-                            newMode = TangentMode.Continuous;
-                        if(previousMode == TangentMode.Continuous)
-                            newMode = TangentMode.Broken;
-                        if(previousMode == TangentMode.Broken)
-                            newMode = TangentMode.Mirrored;
-
-                        knot.SetTangentMode(newMode, (BezierTangent)tangent.TangentIndex);
-                        TransformOperation.UpdateHandleRotation();
-                        // Ensures the tangent mode indicators refresh
-                        SceneView.RepaintAll();
-                    }
-                }
-            }
-        }
-
-        [Shortcut("Yuksel Splines/Cycle Tangent Mode", typeof(SceneView), KeyCode.C)]
-        static void ShortcutCycleTangentMode(ShortcutArguments args)
-        {
-            if (activeTool != null)
-                CycleTangentMode();
-        }
-
         [Shortcut("Yuksel Splines/Toggle Manipulation Space", typeof(SceneView), KeyCode.X)]
         static void ShortcutCycleHandleOrientation(ShortcutArguments args)
         {

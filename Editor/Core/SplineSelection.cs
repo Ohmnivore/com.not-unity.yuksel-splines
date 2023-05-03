@@ -338,7 +338,6 @@ namespace UnityEditor.YukselSplines
                     // In the case of a tangent, also check that the tangent is still valid if the spline type
                     // or tangent mode has been updated
                     var spline = SplineToolContext.GetSpline(selection[i].target, selection[i].targetIndex);
-                    removeElement = !SplineUtility.AreTangentsModifiable(spline.GetTangentMode(selection[i].knotIndex));
                 }
 
                 if (removeElement)

@@ -90,7 +90,7 @@ namespace UnityEditor.YukselSplines
 
             for (int curveIndex = 0; curveIndex < lastIndex + 1; ++curveIndex)
             {
-                var curve = spline.GetCurve(curveIndex).Transform(localToWorld);
+                var curve = spline.GetCurve(curveIndex, localToWorld);
                 CurveHandles.DrawWithoutHighlight(
                     s_ControlIDs[curveIndex],
                     curve,
@@ -103,7 +103,7 @@ namespace UnityEditor.YukselSplines
 
             for (int curveIndex = 0; curveIndex < lastIndex + 1; ++curveIndex)
             {
-                var curve = spline.GetCurve(curveIndex).Transform(localToWorld);
+                var curve = spline.GetCurve(curveIndex, localToWorld);
                 CurveHandles.DrawWithHighlight(
                     s_ControlIDs[curveIndex],
                     curve,
@@ -127,28 +127,25 @@ namespace UnityEditor.YukselSplines
                     k_TangentChildIDs.Clear();
                     var knot = new SelectableKnot(splineInfo, knotIndex);
 
-                    if (SplineUtility.AreTangentsModifiable(splineInfo.Spline.GetTangentMode(knotIndex)))
+                    var tangentIn = new SelectableTangent(splineInfo, knotIndex, BezierTangent.In);
+                    var tangentOut = new SelectableTangent(splineInfo, knotIndex, BezierTangent.Out);
+
+                    var controlIdIn = GUIUtility.GetControlID(FocusType.Passive);
+                    var controlIdOut = GUIUtility.GetControlID(FocusType.Passive);
+                    // Tangent In
+                    if (GUIUtility.hotControl == controlIdIn || SplineHandleUtility.ShouldShowTangent(tangentIn) && (spline.Closed || knotIndex != 0))
                     {
-                        var tangentIn = new SelectableTangent(splineInfo, knotIndex, BezierTangent.In);
-                        var tangentOut = new SelectableTangent(splineInfo, knotIndex, BezierTangent.Out);
+                        SelectionHandle(controlIdIn, tangentIn);
+                        k_TangentChildIDs.Add(controlIdIn);
+                        TangentHandles.Draw(controlIdIn, tangentIn);
+                    }
 
-                        var controlIdIn = GUIUtility.GetControlID(FocusType.Passive);
-                        var controlIdOut = GUIUtility.GetControlID(FocusType.Passive);
-                        // Tangent In
-                        if (GUIUtility.hotControl == controlIdIn || SplineHandleUtility.ShouldShowTangent(tangentIn) && (spline.Closed || knotIndex != 0))
-                        {
-                            SelectionHandle(controlIdIn, tangentIn);
-                            k_TangentChildIDs.Add(controlIdIn);
-                            TangentHandles.Draw(controlIdIn, tangentIn);
-                        }
-
-                        // Tangent Out
-                        if (GUIUtility.hotControl == controlIdOut || SplineHandleUtility.ShouldShowTangent(tangentOut) && (spline.Closed || knotIndex + 1 != spline.Count))
-                        {
-                            SelectionHandle(controlIdOut, tangentOut);
-                            k_TangentChildIDs.Add(controlIdOut);
-                            TangentHandles.Draw(controlIdOut, tangentOut);
-                        }
+                    // Tangent Out
+                    if (GUIUtility.hotControl == controlIdOut || SplineHandleUtility.ShouldShowTangent(tangentOut) && (spline.Closed || knotIndex + 1 != spline.Count))
+                    {
+                        SelectionHandle(controlIdOut, tangentOut);
+                        k_TangentChildIDs.Add(controlIdOut);
+                        TangentHandles.Draw(controlIdOut, tangentOut);
                     }
 
                     var id = GetKnotID(knot);

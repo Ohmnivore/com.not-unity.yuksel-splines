@@ -156,11 +156,12 @@ namespace UnityEngine.YukselSplines
         /// </returns>
         public BezierCurve GetCurve(int index)
         {
-            int bi = math.min(math.max(index + 1, 0), Range.Count-1);
-            BezierKnot a = this[index], b = this[bi];
-            if (index == bi)
-                return new BezierCurve(a.Position, b.Position);
-            return new BezierCurve(a, b);
+            int indexFromRange = Range[index];
+            indexFromRange = (indexFromRange + Spline.Count) % Spline.Count;
+
+            var points = YukselSplines.Spline.GetCurveKnotIndicesForIndex(indexFromRange, Spline.Count, Spline.Closed);
+
+            return new BezierCurve(points.p0, points.p1, points.p2, points.p3, Transform);
         }
 
         /// <summary>

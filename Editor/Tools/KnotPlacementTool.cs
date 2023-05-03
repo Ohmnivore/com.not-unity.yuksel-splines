@@ -155,11 +155,6 @@ namespace UnityEditor.YukselSplines
                 {
                     knot.SplineInfo.Spline.Closed = true;
 
-                    //When using a Bezier Tangent, break the mode on the first knot to keep both tangents
-                    if (knot.Mode != EditorSplineUtility.DefaultTangentMode ||
-                        math.lengthsq(tangentOut) > float.Epsilon)
-                        knot.Mode = TangentMode.Broken;
-
                     SelectableTangent tangent;
                     switch (m_Direction)
                     {
@@ -235,20 +230,14 @@ namespace UnityEditor.YukselSplines
                 if (target.IsValid() && target.Equals(lastKnot))
                     return;
 
-                var mode = EditorSplineUtility.GetModeFromPlacementTangent(tangent);
                 position = ApplyIncrementalSnap(position, lastKnot.Position);
 
-                if (mode == TangentMode.AutoSmooth)
-                    tangent = SplineUtility.GetAutoSmoothTangent(lastKnot.Position, position, SplineUtility.CatmullRomTension);
-
                 BezierCurve previewCurve = m_Direction == DrawingDirection.Start
-                    ? EditorSplineUtility.GetPreviewCurveFromStart(CurrentSplineInfo, lastKnot.KnotIndex, position, tangent, mode)
-                    : EditorSplineUtility.GetPreviewCurveFromEnd(CurrentSplineInfo, lastKnot.KnotIndex, position, tangent, mode);
+                    ? EditorSplineUtility.GetPreviewCurveFromStart(CurrentSplineInfo, lastKnot.KnotIndex, position, tangent)
+                    : EditorSplineUtility.GetPreviewCurveFromEnd(CurrentSplineInfo, lastKnot.KnotIndex, position, tangent);
 
                 CurveHandles.Draw(-1, previewCurve);
 
-                if (SplineUtility.AreTangentsModifiable(lastKnot.Mode) && CurrentSplineInfo.Spline.Count > 0)
-                    TangentHandles.DrawInformativeTangent(previewCurve.P1, previewCurve.P0);
 #if UNITY_2022_2_OR_NEWER
                 KnotHandles.Draw(position, SplineUtility.GetKnotRotation(tangent, normal), Handles.elementColor, false, false);
 #else
@@ -348,7 +337,7 @@ namespace UnityEditor.YukselSplines
                 EditorSplineUtility.GetSplinesFromTarget(target, m_SplineBuffer);
                 bool isMainTarget = target == mainTarget;
 
-                var previewIndex = 0;
+                // var previewIndex = 0;
 
 
                 //Draw curves
@@ -359,36 +348,37 @@ namespace UnityEditor.YukselSplines
 
                     for (int i = 0, count = spline.GetCurveCount(); i < count; ++i)
                     {
-                        if (previewIndex < previewCurvesList.Count)
-                        {
-                            var currentPreview = previewCurvesList[previewIndex];
+                        // TODO
+                        //if (previewIndex < previewCurvesList.Count)
+                        //{
+                        //    var currentPreview = previewCurvesList[previewIndex];
 
-                            if (currentPreview.spline.Equals(spline) && currentPreview.curveIndex == i)
-                            {
-                                var curveKnots = currentPreview.knots;
-                                for (int knotIndex = 0; knotIndex + 1 < curveKnots.Count; ++knotIndex)
-                                {
-                                    var previewCurve =
-                                        new BezierCurve(curveKnots[knotIndex], curveKnots[knotIndex + 1]);
-                                    previewCurve = previewCurve.Transform(localToWorld);
-                                    CurveHandles.Draw(previewCurve, isMainTarget);
-                                    if (isMainTarget)
-                                    {
-                                        CurveHandles.DrawFlow(
-                                            previewCurve,
-                                            null,
-                                            -1,
-                                            math.rotate(new SelectableKnot(splineInfo, i).Rotation, math.up()),
-                                            math.rotate(new SelectableKnot(splineInfo, SplineUtility.NextIndex(i, spline.Count, spline.Closed)).Rotation, math.up()));
-                                    }
-                                }
+                        //    if (currentPreview.spline.Equals(spline) && currentPreview.curveIndex == i)
+                        //    {
+                        //        var curveKnots = currentPreview.knots;
+                        //        for (int knotIndex = 0; knotIndex + 1 < curveKnots.Count; ++knotIndex)
+                        //        {
+                        //            var previewCurve =
+                        //                new BezierCurve(curveKnots[knotIndex], curveKnots[knotIndex + 1]);
+                        //            previewCurve = previewCurve.Transform(localToWorld);
+                        //            CurveHandles.Draw(previewCurve, isMainTarget);
+                        //            if (isMainTarget)
+                        //            {
+                        //                CurveHandles.DrawFlow(
+                        //                    previewCurve,
+                        //                    null,
+                        //                    -1,
+                        //                    math.rotate(new SelectableKnot(splineInfo, i).Rotation, math.up()),
+                        //                    math.rotate(new SelectableKnot(splineInfo, SplineUtility.NextIndex(i, spline.Count, spline.Closed)).Rotation, math.up()));
+                        //            }
+                        //        }
 
-                                previewIndex++;
-                                continue;
-                            }
-                        }
+                        //        previewIndex++;
+                        //        continue;
+                        //    }
+                        //}
 
-                        var curve = spline.GetCurve(i).Transform(localToWorld);
+                        var curve = spline.GetCurve(i, localToWorld);
                         CurveHandles.Draw(curve, isMainTarget);
                         if (isMainTarget)
                         {
@@ -418,21 +408,18 @@ namespace UnityEditor.YukselSplines
 #else
                             KnotHandles.Draw(new SelectableKnot(splineInfo, knotIndex), SplineHandleUtility.knotColor, false, isHovered);
 #endif
-                            if (SplineUtility.AreTangentsModifiable(spline.GetTangentMode(knotIndex)))
+                            //Tangent In
+                            if (spline.Closed || knotIndex != 0)
                             {
-                                //Tangent In
-                                if (spline.Closed || knotIndex != 0)
-                                {
-                                    var tangentIn = new SelectableTangent(splineInfo, knotIndex, BezierTangent.In);
-                                    TangentHandles.DrawInformativeTangent(tangentIn, isMainTarget);
-                                }
+                                var tangentIn = new SelectableTangent(splineInfo, knotIndex, BezierTangent.In);
+                                TangentHandles.DrawInformativeTangent(tangentIn, isMainTarget);
+                            }
 
-                                //Tangent Out
-                                if (spline.Closed || knotIndex + 1 != spline.Count)
-                                {
-                                    var tangentOut = new SelectableTangent(splineInfo, knotIndex, BezierTangent.Out);
-                                    TangentHandles.DrawInformativeTangent(tangentOut, isMainTarget);
-                                }
+                            //Tangent Out
+                            if (spline.Closed || knotIndex + 1 != spline.Count)
+                            {
+                                var tangentOut = new SelectableTangent(splineInfo, knotIndex, BezierTangent.Out);
+                                TangentHandles.DrawInformativeTangent(tangentOut, isMainTarget);
                             }
                         }
                         else
@@ -461,7 +448,6 @@ namespace UnityEditor.YukselSplines
                     {
                         var current = startFrom;
                         var tOut = current.TangentOut;
-                        current.Mode = TangentMode.Broken;
                         tOut.Direction = tangent;
                     }
 
@@ -477,7 +463,6 @@ namespace UnityEditor.YukselSplines
                     {
                         var current = startFrom;
                         var tIn = current.TangentIn;
-                        current.Mode = TangentMode.Broken;
                         tIn.Direction = tangent;
                     }
 

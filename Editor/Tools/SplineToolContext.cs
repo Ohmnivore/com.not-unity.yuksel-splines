@@ -65,8 +65,6 @@ namespace UnityEditor.YukselSplines
                 return typeof(SplineMoveTool);
             if (tool == Tool.Rotate)
                 return typeof(SplineRotateTool);
-            if (tool == Tool.Scale)
-                return typeof(SplineScaleTool);
             return null;
         }
 
