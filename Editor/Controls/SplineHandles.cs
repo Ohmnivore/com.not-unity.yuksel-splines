@@ -127,26 +127,8 @@ namespace UnityEditor.YukselSplines
                     k_TangentChildIDs.Clear();
                     var knot = new SelectableKnot(splineInfo, knotIndex);
 
-                    var tangentIn = new SelectableTangent(splineInfo, knotIndex, BezierTangent.In);
-                    var tangentOut = new SelectableTangent(splineInfo, knotIndex, BezierTangent.Out);
-
                     var controlIdIn = GUIUtility.GetControlID(FocusType.Passive);
                     var controlIdOut = GUIUtility.GetControlID(FocusType.Passive);
-                    // Tangent In
-                    if (GUIUtility.hotControl == controlIdIn || SplineHandleUtility.ShouldShowTangent(tangentIn) && (spline.Closed || knotIndex != 0))
-                    {
-                        SelectionHandle(controlIdIn, tangentIn);
-                        k_TangentChildIDs.Add(controlIdIn);
-                        TangentHandles.Draw(controlIdIn, tangentIn);
-                    }
-
-                    // Tangent Out
-                    if (GUIUtility.hotControl == controlIdOut || SplineHandleUtility.ShouldShowTangent(tangentOut) && (spline.Closed || knotIndex + 1 != spline.Count))
-                    {
-                        SelectionHandle(controlIdOut, tangentOut);
-                        k_TangentChildIDs.Add(controlIdOut);
-                        TangentHandles.Draw(controlIdOut, tangentOut);
-                    }
 
                     var id = GetKnotID(knot);
                     SelectionHandle(id, knot);
@@ -210,10 +192,7 @@ namespace UnityEditor.YukselSplines
                         EditorSplineUtility.RecordObject(element.SplineInfo, "Move Knot");
                         var pos = TransformOperation.ApplySmartRounding(DirectManipulation.UpdateDrag(id));
 
-                        if (element is SelectableTangent tangent)
-                            EditorSplineUtility.ApplyPositionToTangent(tangent, pos);
-                        else
-                            element.Position = pos;
+                        element.Position = pos;
 
                         evt.Use();
                     }

@@ -60,9 +60,6 @@ namespace UnityEngine.YukselSplines
         /// </summary>
         public bool Closed => false;
 
-        static BezierKnot FlipTangents(BezierKnot knot) =>
-            new BezierKnot(knot.Position, knot.TangentOut, knot.TangentIn, knot.Rotation);
-
         /// <summary>
         /// Get a <see cref="BezierKnot"/> at the zero-based index of this <see cref="SplineSlice{T}"/>.
         /// </summary>
@@ -74,9 +71,7 @@ namespace UnityEngine.YukselSplines
                 int indexFromRange = Range[index];
                 indexFromRange = (indexFromRange + Spline.Count) % Spline.Count;
 
-                return Range.Direction == SliceDirection.Backward
-                   ? FlipTangents(Spline[indexFromRange]).Transform(Transform)
-                   : Spline[indexFromRange].Transform(Transform);
+                return Spline[indexFromRange].Transform(Transform);
             }
         }
 
@@ -159,9 +154,8 @@ namespace UnityEngine.YukselSplines
             int indexFromRange = Range[index];
             indexFromRange = (indexFromRange + Spline.Count) % Spline.Count;
 
-            var points = YukselSplines.Spline.GetCurveKnotIndicesForIndex(indexFromRange, Spline.Count, Spline.Closed);
-
-            return new BezierCurve(points.p0, points.p1, points.p2, points.p3, Transform);
+            var indices = YukselSplines.Spline.GetCurveKnotIndicesForIndex(indexFromRange, Spline.Count, Spline.Closed);
+            return new BezierCurve(this[indices.p0], this[indices.p1], this[indices.p2], this[indices.p3], Transform);
         }
 
         /// <summary>

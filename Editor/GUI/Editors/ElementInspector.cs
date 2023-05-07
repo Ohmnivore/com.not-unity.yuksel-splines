@@ -19,7 +19,6 @@ namespace UnityEditor.YukselSplines
 
         IElementDrawer m_ElementDrawer;
         readonly BezierKnotDrawer m_BezierKnotDrawer = new BezierKnotDrawer();
-        readonly TangentDrawer m_TangentDrawer = new TangentDrawer();
 
         static StyleSheet s_CommonStyleSheet;
         static StyleSheet s_ThemeStyleSheet;
@@ -82,13 +81,10 @@ namespace UnityEditor.YukselSplines
         void UpdateDrawerForElements(IReadOnlyList<SplineInfo> selectedSplines)
         {
             bool hasKnot = SplineSelection.HasAny<SelectableKnot>(selectedSplines);
-            bool hasTangent = SplineSelection.HasAny<SelectableTangent>(selectedSplines);
 
             IElementDrawer targetDrawer;
             if (hasKnot)
                 targetDrawer = m_BezierKnotDrawer;
-            else if (hasTangent)
-                targetDrawer = m_TangentDrawer;
             else
                 targetDrawer = null;
 

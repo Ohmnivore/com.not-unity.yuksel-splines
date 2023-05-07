@@ -20,22 +20,6 @@ using UnityEngine.UIElements;
 
 namespace UnityEditor.YukselSplines
 {
-    [CustomEditor(typeof(KnotPlacementTool))]
-#if UNITY_2022_1_OR_NEWER
-    class KnotPlacementToolSettings : UnityEditor.Editor, ICreateToolbar
-    {
-        public IEnumerable<string> toolbarElements
-        {
-#else
-    class KnotPlacementToolSettings : CreateToolbarBase
-    {
-        protected override IEnumerable<string> toolbarElements
-        {
-#endif
-            get { yield return "Yuksel Spline Tool Settings/Default Knot Type"; }
-        }
-    }
-
     [EditorTool("Draw Spline", typeof(ISplineContainer), typeof(SplineToolContext))]
     sealed class KnotPlacementTool : SplineTool
     {   
@@ -113,8 +97,7 @@ namespace UnityEditor.YukselSplines
                         {
                             var lastKnot = new SelectableKnot(CurrentSplineInfo, CurrentSplineInfo.Spline.Count - 1);
                             var normal = math.mul(lastKnot.Rotation, math.up());
-                            EditorSplineUtility.AddKnotToTheStart(CurrentSplineInfo, lastKnot.Position, normal,
-                                -lastKnot.TangentOut.Direction);
+                            EditorSplineUtility.AddKnotToTheStart(CurrentSplineInfo, lastKnot.Position);
 
                             //Adding the knot before the first element is shifting indexes using a callback
                             //Using a delay called here to be certain that the indexes has been shift and that this new link won't be shifted
@@ -128,8 +111,7 @@ namespace UnityEditor.YukselSplines
                         {
                             var firstKnot = new SelectableKnot(CurrentSplineInfo, 0);
                             var normal = math.mul(firstKnot.Rotation, math.up());
-                            EditorSplineUtility.AddKnotToTheEnd(CurrentSplineInfo, firstKnot.Position, normal,
-                                -firstKnot.TangentIn.Direction);
+                            EditorSplineUtility.AddKnotToTheEnd(CurrentSplineInfo, firstKnot.Position);
                             EditorSplineUtility.LinkKnots(new SelectableKnot(CurrentSplineInfo, 0),
                                 new SelectableKnot(CurrentSplineInfo, CurrentSplineInfo.Spline.Count - 1));
                             break;
@@ -154,24 +136,6 @@ namespace UnityEditor.YukselSplines
                              new SelectableKnot(CurrentSplineInfo, closeKnotIndex)) ))
                 {
                     knot.SplineInfo.Spline.Closed = true;
-
-                    SelectableTangent tangent;
-                    switch (m_Direction)
-                    {
-                        case DrawingDirection.Start:
-                            tangent = new SelectableTangent(knot.SplineInfo, closeKnotIndex, BezierTangent.Out);
-                            break;
-
-                        case DrawingDirection.End:
-                            tangent = new SelectableTangent(knot.SplineInfo, closeKnotIndex, BezierTangent.In);
-                            break;
-
-                        default:
-                            tangent = default;
-                            break;
-                    }
-
-                    tangent.Direction = -tangentOut;
                 }
                 else
                 {
@@ -209,10 +173,10 @@ namespace UnityEditor.YukselSplines
                 switch (m_Direction)
                 {
                     case DrawingDirection.Start:
-                        return EditorSplineUtility.AddKnotToTheStart(CurrentSplineInfo, position, normal, tangentOut, false);
+                        return EditorSplineUtility.AddKnotToTheStart(CurrentSplineInfo, position, false);
 
                     case DrawingDirection.End:
-                        return EditorSplineUtility.AddKnotToTheEnd(CurrentSplineInfo, position, normal, tangentOut, false);
+                        return EditorSplineUtility.AddKnotToTheEnd(CurrentSplineInfo, position, false);
                 }
 
                 return default;
@@ -220,12 +184,6 @@ namespace UnityEditor.YukselSplines
 
             void DrawCurvePreview(float3 position, float3 normal, float3 tangent, SelectableKnot target)
             {
-                if (!Mathf.Approximately(math.length(tangent), 0))
-                {
-                    TangentHandles.Draw(position - tangent, position, normal);
-                    TangentHandles.Draw(position + tangent, position, normal);
-                }
-
                 var lastKnot = GetLastAddedKnot();
                 if (target.IsValid() && target.Equals(lastKnot))
                     return;
@@ -233,8 +191,8 @@ namespace UnityEditor.YukselSplines
                 position = ApplyIncrementalSnap(position, lastKnot.Position);
 
                 BezierCurve previewCurve = m_Direction == DrawingDirection.Start
-                    ? EditorSplineUtility.GetPreviewCurveFromStart(CurrentSplineInfo, lastKnot.KnotIndex, position, tangent)
-                    : EditorSplineUtility.GetPreviewCurveFromEnd(CurrentSplineInfo, lastKnot.KnotIndex, position, tangent);
+                    ? EditorSplineUtility.GetPreviewCurveFromStart(CurrentSplineInfo, lastKnot.KnotIndex, position)
+                    : EditorSplineUtility.GetPreviewCurveFromEnd(CurrentSplineInfo, lastKnot.KnotIndex, position);
 
                 CurveHandles.Draw(-1, previewCurve);
 
@@ -408,19 +366,6 @@ namespace UnityEditor.YukselSplines
 #else
                             KnotHandles.Draw(new SelectableKnot(splineInfo, knotIndex), SplineHandleUtility.knotColor, false, isHovered);
 #endif
-                            //Tangent In
-                            if (spline.Closed || knotIndex != 0)
-                            {
-                                var tangentIn = new SelectableTangent(splineInfo, knotIndex, BezierTangent.In);
-                                TangentHandles.DrawInformativeTangent(tangentIn, isMainTarget);
-                            }
-
-                            //Tangent Out
-                            if (spline.Closed || knotIndex + 1 != spline.Count)
-                            {
-                                var tangentOut = new SelectableTangent(splineInfo, knotIndex, BezierTangent.Out);
-                                TangentHandles.DrawInformativeTangent(tangentOut, isMainTarget);
-                            }
                         }
                         else
                             KnotHandles.DrawInformativeKnot(new SelectableKnot(splineInfo, knotIndex));
@@ -444,13 +389,6 @@ namespace UnityEditor.YukselSplines
             {
                 if (EditorSplineUtility.IsEndKnot(startFrom))
                 {
-                    if (math.lengthsq(tangent) > float.Epsilon)
-                    {
-                        var current = startFrom;
-                        var tOut = current.TangentOut;
-                        tOut.Direction = tangent;
-                    }
-
                     m_CurrentDrawingOperation = new DrawingOperation(startFrom.SplineInfo,
                         DrawingOperation.DrawingDirection.End, false);
                     
@@ -459,13 +397,6 @@ namespace UnityEditor.YukselSplines
 
                 if (startFrom.KnotIndex == 0)
                 {
-                    if (math.lengthsq(tangent) > float.Epsilon)
-                    {
-                        var current = startFrom;
-                        var tIn = current.TangentIn;
-                        tIn.Direction = tangent;
-                    }
-
                     m_CurrentDrawingOperation = new DrawingOperation(startFrom.SplineInfo,
                         DrawingOperation.DrawingDirection.Start, false);
                     
@@ -506,16 +437,13 @@ namespace UnityEditor.YukselSplines
             else
                 splineInfo = EditorSplineUtility.CreateSpline(container);
 
-            EditorSplineUtility.AddKnotToTheEnd(splineInfo, position, normal, tangentOut, false);
+            EditorSplineUtility.AddKnotToTheEnd(splineInfo, position, false);
             m_CurrentDrawingOperation = new DrawingOperation(splineInfo, DrawingOperation.DrawingDirection.End, false);
         }
 
         //SelectableKnot is not used and only here as this method is used as a `Action<float3, float3, float3, SelectableKnot>` by the `KnotPlacementHandle` method
         void DrawKnotCreationPreview(float3 position, float3 normal, float3 tangentOut, SelectableKnot _)
         {
-            if (!Mathf.Approximately(math.length(tangentOut), 0))
-                TangentHandles.Draw(position + tangentOut, position, normal);
-
 #if UNITY_2022_2_OR_NEWER
             KnotHandles.Draw(position, SplineUtility.GetKnotRotation(tangentOut, normal), Handles.elementColor, false, false);
 #else
@@ -570,15 +498,6 @@ namespace UnityEditor.YukselSplines
 
                     if (s_PlacementData != null)
                     {
-                        var knotPosition = s_PlacementData.Position;
-                        var tangentOut = s_PlacementData.TangentOut;
-
-                        if (!Mathf.Approximately(math.length(s_PlacementData.TangentOut), 0))
-                        {
-                            TangentHandles.Draw(knotPosition - tangentOut, knotPosition, s_PlacementData.Normal);
-                            TangentHandles.Draw(knotPosition + tangentOut, knotPosition, s_PlacementData.Normal);
-                        }
-
                         drawPreview.Invoke(s_PlacementData.Position, s_PlacementData.Normal, s_PlacementData.TangentOut,
                             default);
                     }
@@ -597,7 +516,7 @@ namespace UnityEditor.YukselSplines
                     else if (EditorSplineUtility.TryGetNearestPositionOnCurve(splines, out SplineCurveHit curveHit))
                     {
                         s_ClosestSpline = curveHit.PreviousKnot.SplineInfo;
-                        EditorSplineUtility.GetAffectedCurves(curveHit, previewCurvesList);
+                        // EditorSplineUtility.GetAffectedCurves(curveHit, previewCurvesList);
                     }
 
                     if (SplineHandleUtility.GetPointOnSurfaces(mouseMovePosition, out Vector3 pos, out Vector3 _))

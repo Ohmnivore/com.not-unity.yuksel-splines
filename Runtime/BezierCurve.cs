@@ -44,14 +44,14 @@ namespace UnityEngine.YukselSplines
 
         public float3 EvaluateFirstDerivative(float t)
         {
-            var parameterVector = new float3(0f, 1f, t);
+            var parameterVector = new float3(0f, 1f, 2f * t);
 
             return math.mul(parameterVector, ControlMatrix);
         }
 
         public float3 EvaluateSecondDerivative(float t)
         {
-            var parameterVector = new float3(0f, 0f, 1f);
+            var parameterVector = new float3(0f, 0f, 2f);
 
             return math.mul(parameterVector, ControlMatrix);
         }
@@ -288,7 +288,7 @@ namespace UnityEngine.YukselSplines
             var sin = math.sin(t);
             var sinSquared = sin * sin;
 
-            var term1 = 2 * (cosSquared * sinSquared) * (f2 - f1);
+            var term1 = 2f * (cosSquared * sinSquared) * (f2 - f1);
             var term2 = 4f * cos * sin * (f2FirstDerivative - f1FirstDerivative);
             var term3 = cosSquared * f1SecondDerivative + sinSquared * f2SecondDerivative;
 

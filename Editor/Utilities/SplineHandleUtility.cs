@@ -109,17 +109,6 @@ namespace UnityEditor.YukselSplines
             get => s_ElementIdRange.y;
             set => s_ElementIdRange.y = value;
         }
-        
-        internal static bool ShouldShowTangent(SelectableTangent tangent)
-        {
-            if (!SplineSelectionUtility.IsSelectable(tangent) || Mathf.Approximately(math.length(tangent.LocalDirection), 0f))
-                return false;
-
-            if (SplineHandleSettings.ShowAllTangents)
-                return true;
-
-            return SplineSelection.IsSelectedOrAdjacentToSelected(tangent);
-        }
 
         internal static void ResetLastHoveredElement()
         {

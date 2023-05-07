@@ -137,8 +137,6 @@ namespace UnityEditor.YukselSplines
 
                 if (element is SelectableKnot knot)
                     m_ElementBuffer[i] = new SelectableKnot(knot.SplineInfo, knot.SplineInfo.Spline.Count - knot.KnotIndex - 1);
-                else if (element is SelectableTangent tangent)
-                    m_ElementBuffer[i] = new SelectableTangent(tangent.SplineInfo, tangent.SplineInfo.Spline.Count - tangent.KnotIndex - 1, (tangent.TangentIndex + 1) % 2);
             }
 
             SplineSelection.Clear();

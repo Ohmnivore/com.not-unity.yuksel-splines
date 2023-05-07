@@ -119,26 +119,8 @@ namespace UnityEditor.YukselSplines
             return activeKnot;
         }
 
-        internal static bool IsSelectable(SelectableTangent tangent)
-        {
-            // For open splines, tangentIn of first knot and tangentOut of last knot should not be selectable
-            switch (tangent.TangentIndex)
-            {
-                case (int)BezierTangent.In:
-                    return tangent.KnotIndex != 0 || tangent.SplineInfo.Spline.Closed;
-
-                case (int)BezierTangent.Out:
-                    return tangent.KnotIndex != tangent.SplineInfo.Spline.Count - 1 || tangent.SplineInfo.Spline.Closed;
-            }
-
-            return true;
-        }
-
         internal static bool IsSelectable(ISplineElement element)
         {
-            if (element is SelectableTangent tangent)
-                return IsSelectable(tangent);
-
             return true;
         }
 

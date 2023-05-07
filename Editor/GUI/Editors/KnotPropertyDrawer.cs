@@ -10,7 +10,7 @@ namespace UnityEditor.YukselSplines
     static class KnotPropertyDrawerUI
     {
         static readonly GUIContent k_Position = EditorGUIUtility.TrTextContent("Position");
-        static readonly GUIContent k_Rotation = EditorGUIUtility.TrTextContent("Rotation");
+        static readonly GUIContent k_TwistAngle = EditorGUIUtility.TrTextContent("Twist Angle");
 
         const float k_IndentPad = 13f; // kIndentPerLevel - margin (probably)
         const int k_MinWideModeWidth = 230;
@@ -24,25 +24,8 @@ namespace UnityEditor.YukselSplines
             float height = SplineGUIUtility.lineHeight;
             // position, rotation
             height += SplineGUIUtility.lineHeight * (CanForceWideMode() ? 2 : 4);
-            // 1. { linear, auto, bezier }
-            // 3. (optional) tangent in
-            // 4. (optional) tangent out
-            height += TangentGetPropertyHeight(meta);
 
             return knot.isExpanded ? height : SplineGUIUtility.lineHeight;
-        }
-
-        public static float TangentGetPropertyHeight(SerializedProperty meta)
-        {
-            return SplineGUIUtility.lineHeight * (CanForceWideMode() ? 2 : 4);
-        }
-
-        public static void TangentOnGUI(ref Rect rect,
-            SerializedProperty tangentIn,
-            SerializedProperty tangentOut)
-        {
-            EditorGUI.PropertyField(SplineGUIUtility.ReserveSpaceForLine(ref rect), tangentIn);
-            EditorGUI.PropertyField(SplineGUIUtility.ReserveSpaceForLine(ref rect), tangentOut);
         }
 
         public static bool OnGUI(Rect rect, SerializedProperty knot, SerializedProperty meta, GUIContent label)
@@ -65,14 +48,10 @@ namespace UnityEditor.YukselSplines
             EditorGUI.BeginChangeCheck();
             if (knot.isExpanded)
             {
-                var rotation = knot.FindPropertyRelative("Rotation");
-                var tangentIn = knot.FindPropertyRelative("TangentIn");
-                var tangentOut = knot.FindPropertyRelative("TangentOut");
+                var twistAngle = knot.FindPropertyRelative("TwistAngle");
 
                 EditorGUI.PropertyField(SplineGUIUtility.ReserveSpaceForLine(ref rect), position, k_Position);
-                SplineGUILayout.QuaternionField(SplineGUIUtility.ReserveSpaceForLine(ref rect), k_Rotation, rotation);
-
-                TangentOnGUI(ref rect, tangentIn, tangentOut);
+                EditorGUI.PropertyField(SplineGUIUtility.ReserveSpaceForLine(ref rect), twistAngle, k_TwistAngle);
             }
             // When in wide mode, show the position field inline with the knot title if not expanded
             else if (EditorGUIUtility.wideMode)

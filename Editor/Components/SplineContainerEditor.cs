@@ -5,7 +5,7 @@ using UnityEngine.YukselSplines;
 namespace UnityEditor.YukselSplines
 {
     // Multi-object selection is not supported
-    [CustomEditor(typeof(SplineContainer))]
+    [CustomEditor(typeof(UnityEngine.YukselSplines.SplineContainer))]
     class SplineContainerEditor : UnityEditor.Editor
     {
         SerializedProperty m_SplineProperty;

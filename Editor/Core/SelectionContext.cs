@@ -10,19 +10,17 @@ namespace UnityEditor.YukselSplines
         public Object target;
         public int targetIndex;
         public int knotIndex;
-        public int tangentIndex;
 
         public SelectableSplineElement(ISplineElement element)
         {
             target = element.SplineInfo.Object;
             targetIndex = element.SplineInfo.Index;
             knotIndex = element.KnotIndex;
-            tangentIndex = element is SelectableTangent tangent ? tangent.TangentIndex : -1;
         }
 
         public bool Equals(SelectableSplineElement other)
         {
-            return target == other.target && targetIndex == other.targetIndex && knotIndex == other.knotIndex && tangentIndex == other.tangentIndex;
+            return target == other.target && targetIndex == other.targetIndex && knotIndex == other.knotIndex;
         }
 
         public override bool Equals(object obj)
@@ -33,7 +31,7 @@ namespace UnityEditor.YukselSplines
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(target, targetIndex, knotIndex, tangentIndex);
+            return HashCode.Combine(target, targetIndex, knotIndex);
         }
     }
 

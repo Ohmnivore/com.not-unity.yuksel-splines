@@ -194,22 +194,6 @@ namespace UnityEditor.YukselSplines
 
             if (screenSpace.z > 0 && rect.Contains(screenSpace))
                 results.Add(new SelectableKnot(splineInfo, index));
-
-            var tangentIn = new SelectableTangent(splineInfo, index, BezierTangent.In);
-            if (SplineSelectionUtility.IsSelectable(tangentIn))
-            {
-                screenSpace = HandleUtility.WorldToGUIPointWithDepth(worldKnot.Position + math.rotate(worldKnot.Rotation, worldKnot.TangentIn));
-                if (screenSpace.z > 0 && rect.Contains(screenSpace))
-                    results.Add(tangentIn);
-            }
-
-            var tangentOut = new SelectableTangent(splineInfo, index, BezierTangent.Out);
-            if (SplineSelectionUtility.IsSelectable(tangentOut))
-            {
-                screenSpace = HandleUtility.WorldToGUIPointWithDepth(worldKnot.Position + math.rotate(worldKnot.Rotation, worldKnot.TangentOut));
-                if (screenSpace.z > 0 && rect.Contains(screenSpace))
-                    results.Add(tangentOut);
-            }
         }
 
         void EndSelection(Rect rect, IReadOnlyList<SplineInfo> splines)

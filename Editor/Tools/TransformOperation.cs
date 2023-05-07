@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.UIElements;
 using UnityEngine.YukselSplines;
 using Object = UnityEngine.Object;
 
@@ -21,47 +22,13 @@ namespace UnityEditor.YukselSplines
         struct TransformData
         {
             internal float3 position;
-            internal float3 inTangentDirection;
-            internal float3 outTangentDirection;
 
             internal static TransformData GetData(ISplineElement element)
             {
                 var tData = new TransformData();
                 tData.position = new float3(element.Position);
-                var knot = new SelectableKnot(element.SplineInfo, element.KnotIndex);
-                tData.inTangentDirection = knot.TangentIn.Direction;
-                tData.outTangentDirection = knot.TangentOut.Direction;
 
                 return tData;
-            }
-        }
-
-        struct RotationSyncData
-        {
-            quaternion m_RotationDelta;
-            float m_MagnitudeDelta;
-            float m_ScaleMultiplier; // Only used for scale operation
-            bool m_Initialized;
-
-            public bool initialized => m_Initialized;
-            public quaternion rotationDelta => m_RotationDelta;
-            public float magnitudeDelta => m_MagnitudeDelta;
-            public float scaleMultiplier => m_ScaleMultiplier;
-
-            public void Initialize(quaternion rotationDelta, float magnitudeDelta, float scaleMultiplier)
-            {
-                m_RotationDelta = rotationDelta;
-                m_MagnitudeDelta = magnitudeDelta;
-                m_ScaleMultiplier = scaleMultiplier;
-                m_Initialized = true;
-            }
-
-            public void Clear()
-            {
-                m_RotationDelta = quaternion.identity;
-                m_MagnitudeDelta = 0f;
-                m_ScaleMultiplier = 1f;
-                m_Initialized = false;
             }
         }
 
@@ -96,7 +63,6 @@ namespace UnityEditor.YukselSplines
         static HashSet<SelectableKnot> s_LinkedKnotCache = new HashSet<SelectableKnot>();
 
         static readonly List<SelectableKnot> s_KnotBuffer = new List<SelectableKnot>();
-        static RotationSyncData s_RotationSyncData = new RotationSyncData();
 
         internal static void UpdateSelection(IEnumerable<Object> selection)
         {
@@ -125,10 +91,7 @@ namespace UnityEditor.YukselSplines
                         goto default;
 
                     var element = s_ElementSelection[0];
-                    if (useKnotPositionForTangents && element is SelectableTangent tangent)
-                        s_PivotPosition = tangent.Owner.Position;
-                    else
-                        s_PivotPosition = element.Position;
+                    s_PivotPosition = element.Position;
                     break;
 
                 default:
@@ -156,8 +119,6 @@ namespace UnityEditor.YukselSplines
 
                 if (SplineTool.handleOrientation == HandleOrientation.Element)
                     handleRotation = EditorSplineUtility.GetElementRotation(curElement);
-                else if (curElement is SelectableTangent editableTangent)
-                    handleRotation = EditorSplineUtility.GetElementRotation(editableTangent.Owner);
             }
 
             s_HandleRotation = handleRotation;
@@ -180,23 +141,9 @@ namespace UnityEditor.YukselSplines
                         EditorSplineUtility.GetKnotLinks(knot, s_KnotBuffer);
                         foreach (var k in s_KnotBuffer)
                             s_LinkedKnotCache.Add(k);
-
-                        if (!s_RotationSyncData.initialized)
-                            s_RotationSyncData.Initialize(quaternion.identity, 0f, 1f);
                     }
                 }
-                else if (element is SelectableTangent tangent)
-                {
-                    knot = tangent.Owner;
-                    //Do nothing on the tangent if the knot is also in the selection
-                    if (s_ElementSelection.Contains(knot))
-                        continue;
-
-                    tangent.Position = ApplySmartRounding(knot.Position + tangent.Direction + delta);
-                }
             }
-
-            s_RotationSyncData.Clear();
         }
         
         public static void ApplyRotation(Quaternion deltaRotation, float3 rotationCenter)
@@ -209,27 +156,8 @@ namespace UnityEditor.YukselSplines
                 {
                     var knotRotation = knot.Rotation;
                     RotateKnot(knot, deltaRotation, rotationCenter);
-                    if (!s_RotationSyncData.initialized)
-                        s_RotationSyncData.Initialize(math.mul(math.inverse(knotRotation), knot.Rotation), 0f, 1f);
-                }
-                else if (element is SelectableTangent tangent && !s_ElementSelection.Contains(tangent.Owner))
-                {
-                    knot = tangent.Owner;
-
-                    if (Tools.pivotMode == PivotMode.Pivot)
-                        rotationCenter = knot.Position;
-
-                    var deltaPos = math.rotate(deltaRotation, tangent.Position - rotationCenter);
-                    tangent.Position = deltaPos + rotationCenter;
                 }
             }
-
-            s_RotationSyncData.Clear();
-        }
-
-        static bool OppositeTangentSelected(SelectableTangent tangent)
-        {
-            return false;
         }
 
         static void RotateKnot(SelectableKnot knot, quaternion deltaRotation, float3 rotationCenter, bool allowTranslation = true)
@@ -257,117 +185,30 @@ namespace UnityEditor.YukselSplines
             else
                 knot.Rotation = math.mul(s_HandleRotation, math.mul(deltaRotation, math.mul(s_HandleRotationInv, knot.Rotation)));
 
+            if (SplineTool.handleOrientation == HandleOrientation.Element)
+            {
+                RotateTwistAngle(knot, deltaRotation);
+            }
+
             s_RotatedKnotCache.Add(knot);
         }
 
-        public static void ApplyScale(float3 scale)
+        static void RotateTwistAngle(SelectableKnot knot, quaternion deltaRotation)
         {
-            s_RotatedKnotCache.Clear();
-            ISplineElement[] scaledElements = new ISplineElement[s_ElementSelectionCount];
+            var finalRotation = math.mul(deltaRotation, knot.Rotation);
 
-            for (int elementIndex = 0; elementIndex < s_ElementSelectionCount; elementIndex++)
-            {
-                var element = s_ElementSelection[elementIndex];
-                if (element is SelectableKnot knot)
-                {
-                    ScaleKnot(knot, elementIndex, scale);
+            var axis = math.mul(knot.Rotation, math.forward());
+            var v1 = math.mul(knot.Rotation, math.up());
+            var v2 = math.mul(finalRotation, math.up());
 
-                    if (!s_RotationSyncData.initialized)
-                        s_RotationSyncData.Initialize(quaternion.identity, 0f, 1f);
-                }
-                else if (element is SelectableTangent tangent && !s_ElementSelection.Contains(tangent.Owner))
-                {
-                    var index = Array.IndexOf(scaledElements, element);
-                    if (index == -1) //element not scaled yet
-                    {
-                        tangent.Position = ScaleTangent(tangent, s_MouseDownData[elementIndex].position, scale);
-                    }
-                }
-
-                scaledElements[elementIndex] = element;
-            }
-
-            s_RotationSyncData.Clear();
-        }
-
-        static void ScaleKnot(SelectableKnot knot, int dataIndex, float3 scale)
-        {
-            if (Tools.pivotMode == PivotMode.Center)
-            {
-                var deltaPos = math.rotate(s_HandleRotationInv,
-                    s_MouseDownData[dataIndex].position - (float3) pivotPosition);
-                var deltaPosKnot = deltaPos * scale;
-                knot.Position = math.rotate(s_HandleRotation, deltaPosKnot) + (float3) pivotPosition;
-            }
-
-            var tangent = knot.TangentIn;
-            tangent.Direction = math.rotate(s_HandleRotation, math.rotate(s_HandleRotationInv, s_MouseDownData[dataIndex].inTangentDirection) * scale);
-            tangent = knot.TangentOut;
-            tangent.Direction = math.rotate(s_HandleRotation, math.rotate(s_HandleRotationInv, s_MouseDownData[dataIndex].outTangentDirection) * scale);
-        }
-
-        static float3 ScaleTangent(SelectableTangent tangent, float3 originalPosition, float3 scale)
-        {
-            var scaleCenter = Tools.pivotMode == PivotMode.Center ? (float3) pivotPosition : tangent.Owner.Position;
-
-            var deltaPos = math.rotate(s_HandleRotationInv, originalPosition - scaleCenter) * scale;
-            return math.rotate(s_HandleRotation, deltaPos) + scaleCenter;
-        }
-
-        static void ApplyTangentRotationSyncTransform(SelectableTangent tangent, bool absoluteScale = true)
-        {
-            if (tangent.Equals(currentElementSelected))
-            {
-                if (absoluteScale)
-                {
-                    var localDirection = tangent.LocalDirection;
-                    if (Mathf.Approximately(math.length(localDirection), 0f))
-                        localDirection = new float3(0, 0, 1f);
-                    
-                    tangent.LocalDirection += math.normalizesafe(localDirection) * s_RotationSyncData.magnitudeDelta;
-                }
-                else
-                    tangent.LocalDirection *=  s_RotationSyncData.scaleMultiplier;
-            }
-
-            RotateKnot(tangent.Owner, s_RotationSyncData.rotationDelta, tangent.Owner.Position, false);
-        }
-
-        /*
-         Given a mirrored tangent and a target position, calculate the knot rotation delta and tangent's local magnitude change required to 
-         put the tangent into target world position while fully respecting the owner spline's transformation (including non-uniform scale).
-         */
-        internal static (quaternion knotRotationDelta, float tangentLocalMagnitudeDelta) CalculateMirroredTangentTranslationDeltas(SelectableTangent tangent, float3 targetPosition)
-        {
-            var knot = tangent.Owner;
-            var splineTrsInv = math.inverse(knot.SplineInfo.LocalToWorld);
-            var splineTrs = knot.SplineInfo.LocalToWorld;
-            var splinePos = splineTrs.c3.xyz;
-            var splineRotation = new quaternion(splineTrs);
-
-            var unscaledTargetPos = splinePos + math.rotate(splineRotation, math.transform(splineTrsInv, targetPosition));
-            var unscaledCurrentPos = splinePos + math.rotate(splineRotation, math.transform(splineTrsInv, tangent.Position));
-            var unscaledKnotPos = splinePos + math.rotate(splineRotation, math.transform(splineTrsInv, knot.Position));
-
-            var knotRotationInv = math.inverse(knot.Rotation);
-            var forward = (tangent.TangentIndex == 0 ? -1f : 1f) * math.normalizesafe(unscaledTargetPos - unscaledKnotPos);
-            var up = math.mul(knot.Rotation, math.up());
-            var knotLookAtRotation = quaternion.LookRotationSafe(forward, up);
-            var knotRotationDelta = math.mul(knotLookAtRotation, knotRotationInv);
-
-            var targetLocalDirection = math.rotate(knotRotationInv, (unscaledTargetPos - unscaledKnotPos));
-            var tangentLocalMagnitudeDelta = math.length(targetLocalDirection) - math.length(tangent.LocalDirection);
-
-            return (knotRotationDelta, tangentLocalMagnitudeDelta);
+            var deltaZ = Vector3.SignedAngle(v1, v2, axis);
+            knot.TwistAngle += deltaZ;
         }
 
         static SelectableKnot GetCurrentSelectionKnot()
         {
             if (currentElementSelected == null)
                 return default;
-
-            if (currentElementSelected is SelectableTangent tangent)
-                return tangent.Owner;
 
             if (currentElementSelected is SelectableKnot knot)
                 return knot;

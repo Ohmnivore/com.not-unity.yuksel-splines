@@ -48,19 +48,46 @@ namespace UnityEditor.YukselSplines
             set => LocalRotation = math.mul(math.inverse(new quaternion(LocalToWorld)), value);
         }
 
+        static readonly float LinearCutoff = 1.0f - math.acos(1f);
+
         public quaternion LocalRotation
         {
-            get => SplineInfo.Spline[KnotIndex].Rotation;
-            set
+            get
             {
                 var knot = SplineInfo.Spline[KnotIndex];
-                knot.Rotation = math.normalize(value);
-                SplineInfo.Spline[KnotIndex] = knot;
+                var curve = SplineInfo.Spline.GetCurve(KnotIndex);
+
+                var tangent = curve.EvaluateTangent(0f);
+                var acceleration = curve.EvaluateAcceleration(0f);
+
+                var cosTheta = math.dot(tangent, acceleration) / (math.length(tangent) * math.length(acceleration));
+                if (math.abs(cosTheta) >= LinearCutoff)
+                    acceleration = math.up();
+
+                var up = knot.GetUpVector(tangent, acceleration);
+
+                return quaternion.LookRotationSafe(tangent, up);
+            }
+
+            set
+            {
+                // TODO
+                //var knot = SplineInfo.Spline[KnotIndex];
+                //knot.Rotation = math.normalize(value);
+                //SplineInfo.Spline[KnotIndex] = knot;
             }
         }
 
-        public SelectableTangent TangentIn => new SelectableTangent(SplineInfo, KnotIndex, BezierTangent.In);
-        public SelectableTangent TangentOut => new SelectableTangent(SplineInfo, KnotIndex, BezierTangent.Out);
+        public float TwistAngle
+        {
+            get => SplineInfo.Spline[KnotIndex].TwistAngle;
+            set
+            {
+                var knot = SplineInfo.Spline[KnotIndex];
+                knot.TwistAngle = value;
+                SplineInfo.Spline[KnotIndex] = knot;
+            }
+        }
 
         public SelectableKnot(SplineInfo info, int index)
         {
@@ -94,100 +121,6 @@ namespace UnityEditor.YukselSplines
         public override int GetHashCode()
         {
             return HashCode.Combine(SplineInfo.Spline, KnotIndex);
-        }
-    }
-
-    struct SelectableTangent : ISplineElement, IEquatable<SelectableTangent>
-    {
-        public SplineInfo SplineInfo { get; }
-        public int KnotIndex { get; }
-        public int TangentIndex { get; }
-        public SelectableKnot Owner => new SelectableKnot(SplineInfo, KnotIndex);
-        public SelectableTangent OppositeTangent => new SelectableTangent(SplineInfo, KnotIndex, 1 - TangentIndex);
-
-        public bool IsValid()
-        {
-            return SplineInfo.Spline != null
-                && KnotIndex >= 0
-                && KnotIndex < SplineInfo.Spline.Count
-                && TangentIndex >= 0
-                && TangentIndex < 2;
-        }
-
-        public float3 Direction
-        {
-            get => MathUtility.MultiplyVector(LocalToWorld, LocalDirection);
-            set => LocalDirection = MathUtility.MultiplyVector(math.inverse(LocalToWorld), value);
-        }
-
-        public float3 LocalDirection
-        {
-            get => TangentIndex == (int)BezierTangent.In ? SplineInfo.Spline[KnotIndex].TangentIn : SplineInfo.Spline[KnotIndex].TangentOut;
-            set
-            {
-                var spline = SplineInfo.Spline;
-                var knot = spline[KnotIndex];
-
-                switch (TangentIndex)
-                {
-                    case (int)BezierTangent.In:
-                        knot.TangentIn = value;
-                        break;
-
-                    case (int)BezierTangent.Out:
-                        knot.TangentOut = value;
-                        break;
-                }
-
-                spline.SetKnot(KnotIndex, knot, (BezierTangent)TangentIndex);
-            }
-        }
-
-        public float4x4 LocalToWorld => math.mul(SplineInfo.LocalToWorld, new float4x4(Owner.LocalRotation, Owner.LocalPosition));
-
-        public float3 Position
-        {
-            get => math.transform(LocalToWorld, LocalPosition);
-            set => LocalPosition = math.transform(math.inverse(LocalToWorld), value);
-        }
-
-        public float3 LocalPosition
-        {
-            get => LocalDirection;
-            set => LocalDirection = value;
-        }
-
-        public SelectableTangent(SplineInfo splineInfo, int knotIndex, BezierTangent tangent)
-            : this(splineInfo, knotIndex, (int)tangent) { }
-
-        public SelectableTangent(SplineInfo splineInfo, int knotIndex, int tangentIndex)
-        {
-            SplineInfo = splineInfo;
-            KnotIndex = knotIndex;
-            TangentIndex = tangentIndex;
-        }
-
-        public bool Equals(ISplineElement other)
-        {
-            if (other is SelectableTangent tangent)
-                return Equals(tangent);
-            return false;
-        }
-
-        public bool Equals(SelectableTangent other)
-        {
-            return Equals(SplineInfo.Spline, other.SplineInfo.Spline) && KnotIndex == other.KnotIndex && TangentIndex == other.TangentIndex;
-        }
-
-        public override bool Equals(object obj)
-        {
-            if (ReferenceEquals(null, obj)) return false;
-            return obj is SelectableTangent other && Equals(other);
-        }
-
-        public override int GetHashCode()
-        {
-            return HashCode.Combine(SplineInfo.Spline, KnotIndex, TangentIndex);
         }
     }
 }

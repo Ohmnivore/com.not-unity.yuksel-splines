@@ -201,19 +201,17 @@ namespace UnityEditor.YukselSplines
                     var knot = new SelectableKnot(info, selectedIndex);
                     if (knot.IsValid())
                     {
+                        var tangent = info.Spline.GetCurve(index).EvaluateTangent(1f);
+
                         EditorSplineUtility.AddKnotToTheEnd(
                             info,
-                            knot.Position + 3f * knot.TangentOut.Direction,
-                            math.rotate(knot.LocalToWorld, math.up()),
-                            knot.TangentOut.Direction);
+                            knot.Position + 3f * tangent);
                     }
                     else
                     {
                         EditorSplineUtility.AddKnotToTheEnd(
                             info,
-                            info.Transform.position,
-                            math.up(),
-                            math.forward());
+                            info.Transform.position);
                     }
 
                     index = count;
@@ -270,7 +268,7 @@ namespace UnityEditor.YukselSplines
                 return;
 
             foreach (var i in SplineSelection.selection
-                .Where(x => ReferenceEquals(x.target, m_Container) && x.targetIndex == m_ContainerIndex && x.tangentIndex < 0)
+                .Where(x => ReferenceEquals(x.target, m_Container) && x.targetIndex == m_ContainerIndex)
                 .Select(y => y.knotIndex))
                 Select(i, true);
         }

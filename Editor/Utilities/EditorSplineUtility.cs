@@ -214,18 +214,13 @@ namespace UnityEditor.YukselSplines
 
             var element = elements[0];
 
-            var position = (useKnotPositionForTangents && element is SelectableTangent tangent)
-                ? tangent.Owner.Position
-                : element.Position;
+            var position = element.Position;
 
             Bounds bounds = new Bounds(position, Vector3.zero);
             for (int i = 1; i < elements.Count; ++i)
             {
                 element = elements[i];
-                if (useKnotPositionForTangents && element is SelectableTangent t)
-                    bounds.Encapsulate(t.Owner.Position);
-                else
-                    bounds.Encapsulate(element.Position);
+                bounds.Encapsulate(element.Position);
             }
 
             return bounds;
@@ -264,30 +259,21 @@ namespace UnityEditor.YukselSplines
         internal static SelectableKnot CreateSpline(SelectableKnot from, float3 tangentOut)
         {
             var splineInfo = CreateSpline(from.SplineInfo.Container);
-            var knot = AddKnotToTheEnd(splineInfo, from.Position, math.mul(from.Rotation, math.up()), tangentOut, false);
+            var knot = AddKnotToTheEnd(splineInfo, from.Position, false);
             LinkKnots(knot, from);
             return knot;
         }
 
-        static SelectableKnot AddKnotInternal(SplineInfo splineInfo, float3 worldPosition, float3 normal, float3 tangentOut, int index, int previousIndex, bool updateSelection)
+        static SelectableKnot AddKnotInternal(SplineInfo splineInfo, float3 worldPosition, int index, bool updateSelection)
         {
             var spline = splineInfo.Spline;
 
             if (spline.Closed && spline.Count >= 2)
                 throw new ArgumentException("Cannot add a point to the extremity of a closed spline", nameof(spline));
 
-            var localToWorld = splineInfo.LocalToWorld;
-
             var localPosition = math.transform(math.inverse(splineInfo.LocalToWorld), worldPosition);
-            quaternion localRotation;
-            BezierKnot newKnot;
 
-            localRotation = math.mul(math.inverse(math.quaternion(localToWorld)), quaternion.LookRotationSafe(tangentOut, normal));
-            var tangentMagnitude = math.length(tangentOut);
-            // Tangents are always assumed to be +/- forward when TangentMode is not Broken.
-            var localTangentIn = new float3(0f, 0f, -tangentMagnitude);
-            var localTangentOut = new float3(0f, 0f, tangentMagnitude);
-            newKnot = new BezierKnot(localPosition, localTangentIn, localTangentOut, localRotation);
+            var newKnot = new BezierKnot(localPosition);
 
             spline.Insert(index, newKnot);
 
@@ -302,14 +288,14 @@ namespace UnityEditor.YukselSplines
             return knot;
         }
 
-        internal static SelectableKnot AddKnotToTheEnd(SplineInfo splineInfo, float3 worldPosition, float3 normal, float3 tangentOut, bool updateSelection = true)
+        internal static SelectableKnot AddKnotToTheEnd(SplineInfo splineInfo, float3 worldPosition, bool updateSelection = true)
         {
-            return AddKnotInternal(splineInfo, worldPosition, normal, tangentOut, splineInfo.Spline.Count, splineInfo.Spline.Count - 1, updateSelection);
+            return AddKnotInternal(splineInfo, worldPosition, splineInfo.Spline.Count, updateSelection);
         }
 
-        internal static SelectableKnot AddKnotToTheStart(SplineInfo splineInfo, float3 worldPosition, float3 normal, float3 tangentIn, bool updateSelection = true)
+        internal static SelectableKnot AddKnotToTheStart(SplineInfo splineInfo, float3 worldPosition, bool updateSelection = true)
         {
-            return AddKnotInternal(splineInfo, worldPosition, normal, -tangentIn, 0, 1, updateSelection);
+            return AddKnotInternal(splineInfo, worldPosition, 0, updateSelection);
         }
 
         internal static void RemoveKnot(SelectableKnot knot)
@@ -332,65 +318,34 @@ namespace UnityEditor.YukselSplines
             return false;
         }
 
-        // Zero out the given tangent and switch knot's tangent mode to Continous if it's Mirrored.
-        internal static void ClearTangent(SelectableTangent tangent)
-        {
-            var spline = tangent.SplineInfo.Spline;
-            var knotIndex = tangent.Owner.KnotIndex;
-            var selectableKnot = tangent.Owner;
-            var bezierKnot = spline[knotIndex];
-
-            switch (tangent.TangentIndex)
-            {
-                case (int)BezierTangent.In:
-                    bezierKnot.TangentIn = float3.zero;
-                    break;
-
-                case (int)BezierTangent.Out:
-                    bezierKnot.TangentOut = float3.zero;
-                    break;
-            }
-
-            spline[knotIndex] = bezierKnot;
-        }
-
-        static BezierCurve GetPreviewCurveInternal(SplineInfo info, int from, float3 fromWorldTangent, float3 toWorldPoint, float3 toWorldTangent, int previousIndex)
+        // Calculate the curve control points in world space given a new end knot.
+        internal static BezierCurve GetPreviewCurveFromEnd(SplineInfo info, int from, float3 toWorldPoint)
         {
             var spline = info.Spline;
-            var trs = info.Transform.localToWorldMatrix;
 
-            var p0 = math.transform(trs, spline[from].Position);
-            var p1 = math.transform(trs, spline[from].Position + math.mul(spline[from].Rotation, fromWorldTangent));
-            var p3 = toWorldPoint;
-            var p2 = p3 - toWorldTangent;
+            var points = Spline.GetCurveKnotIndicesForIndex(from, spline.Count, spline.Closed);
 
-            return new BezierCurve(p0, p1, p2, p3);
-        }
+            var p0 = spline[points.p0];
+            var p1 = spline[points.p1];
+            var p2 = new BezierKnot(math.transform(info.Transform.worldToLocalMatrix, toWorldPoint));
+            var p3 = p2;
 
-        // Calculate the curve control points in world space given a new end knot.
-        internal static BezierCurve GetPreviewCurveFromEnd(SplineInfo info, int from, float3 toWorldPoint, float3 toWorldTangent)
-        {
-            var tangentOut = info.Spline[from].TangentOut;
-            if(info.Spline.Closed && (from == 0 || AreKnotLinked( new SelectableKnot(info, from), new SelectableKnot(info, 0))))
-            {
-                var fromKnot = info.Spline[from];
-                tangentOut = -fromKnot.TangentIn;
-            }
-
-            return GetPreviewCurveInternal(info, from, tangentOut, toWorldPoint, toWorldTangent, info.Spline.PreviousIndex(from));
+            return new BezierCurve(p0, p1, p2, p3, info.Transform.localToWorldMatrix);
         }
 
         // Calculate the curve control points in world space given a new start knot.
-        internal static BezierCurve GetPreviewCurveFromStart(SplineInfo info, int from, float3 toWorldPoint, float3 toWorldTangent)
+        internal static BezierCurve GetPreviewCurveFromStart(SplineInfo info, int from, float3 toWorldPoint)
         {
-            var tangentIn = info.Spline[from].TangentIn;
-            if(info.Spline.Closed && (from == info.Spline.Count - 1  || AreKnotLinked( new SelectableKnot(info, from), new SelectableKnot(info, info.Spline.Count - 1))))
-            {
-                var fromKnot = info.Spline[from];
-                tangentIn = -fromKnot.TangentOut;
-            }
+            var spline = info.Spline;
 
-            return GetPreviewCurveInternal(info, from, tangentIn, toWorldPoint, toWorldTangent, info.Spline.NextIndex(from));
+            var points = Spline.GetCurveKnotIndicesForIndex(from, spline.Count, spline.Closed);
+
+            var p0 = new BezierKnot(math.transform(info.Transform.worldToLocalMatrix, toWorldPoint));
+            var p1 = p0;
+            var p2 = spline[points.p0];
+            var p3 = spline[points.p2];
+
+            return new BezierCurve(p0, p1, p2, p3, info.Transform.localToWorldMatrix);
         }
 
         internal static quaternion CalculateKnotRotation(float3 previous, float3 position, float3 next, float3 normal)
@@ -411,36 +366,36 @@ namespace UnityEditor.YukselSplines
 
         //Get the affected curves when trying to add a knot on an existing segment
         //internal static void GetAffectedCurves(SplineCurveHit hit, Dictionary<Spline, Dictionary<int, List<BezierKnot>>> affectedCurves)
-        internal static void GetAffectedCurves(SplineCurveHit hit, List<(Spline s, int index,  List<BezierKnot> knots)> affectedCurves)
-        {
-            var spline = hit.PreviousKnot.SplineInfo.Spline;
-            var curveIndex = hit.PreviousKnot.KnotIndex;
-            var hitLocalPosition = hit.PreviousKnot.SplineInfo.Transform.InverseTransformPoint(hit.Position);
+        //internal static void GetAffectedCurves(SplineCurveHit hit, List<(Spline s, int index,  List<BezierKnot> knots)> affectedCurves)
+        //{
+        //    var spline = hit.PreviousKnot.SplineInfo.Spline;
+        //    var curveIndex = hit.PreviousKnot.KnotIndex;
+        //    var hitLocalPosition = hit.PreviousKnot.SplineInfo.Transform.InverseTransformPoint(hit.Position);
 
-            var previewKnots = new List<BezierKnot>();
+        //    var previewKnots = new List<BezierKnot>();
 
-            var sKnot = hit.PreviousKnot;
-            var bKnot = new BezierKnot(sKnot.LocalPosition, sKnot.TangentIn.LocalPosition, sKnot.TangentOut.LocalPosition, sKnot.LocalRotation);
+        //    var sKnot = hit.PreviousKnot;
+        //    var bKnot = new BezierKnot(sKnot.LocalPosition, sKnot.TangentIn.LocalPosition, sKnot.TangentOut.LocalPosition, sKnot.LocalRotation);
 
-            var insertedKnot = GetInsertedKnotPreview(hit.PreviousKnot.SplineInfo, hit.NextKnot.KnotIndex, hit.T, out var leftTangent, out var rightTangent);
+        //    var insertedKnot = GetInsertedKnotPreview(hit.PreviousKnot.SplineInfo, hit.NextKnot.KnotIndex, hit.T, out var leftTangent, out var rightTangent);
 
-            bKnot.TangentOut = math.mul(math.inverse(sKnot.LocalRotation), leftTangent);
+        //    bKnot.TangentOut = math.mul(math.inverse(sKnot.LocalRotation), leftTangent);
 
-            previewKnots.Add(bKnot);
+        //    previewKnots.Add(bKnot);
 
-            previewKnots.Add(insertedKnot);
-            var affectedCurveIndex = affectedCurves.FindIndex(x => x.s == spline && x.index == curveIndex);
-            if(affectedCurveIndex >= 0)
-                affectedCurves.RemoveAt(affectedCurveIndex);
-            affectedCurves.Add((spline, curveIndex, previewKnots));
+        //    previewKnots.Add(insertedKnot);
+        //    var affectedCurveIndex = affectedCurves.FindIndex(x => x.s == spline && x.index == curveIndex);
+        //    if(affectedCurveIndex >= 0)
+        //        affectedCurves.RemoveAt(affectedCurveIndex);
+        //    affectedCurves.Add((spline, curveIndex, previewKnots));
 
-            sKnot = hit.NextKnot;
-            bKnot = new BezierKnot(sKnot.LocalPosition, sKnot.TangentIn.LocalPosition, sKnot.TangentOut.LocalPosition, sKnot.LocalRotation);
+        //    sKnot = hit.NextKnot;
+        //    bKnot = new BezierKnot(sKnot.LocalPosition, sKnot.TangentIn.LocalPosition, sKnot.TangentOut.LocalPosition, sKnot.LocalRotation);
 
-            bKnot.TangentIn = math.mul(math.inverse(sKnot.LocalRotation), rightTangent);
+        //    bKnot.TangentIn = math.mul(math.inverse(sKnot.LocalRotation), rightTangent);
 
-            previewKnots.Add(bKnot);
-        }
+        //    previewKnots.Add(bKnot);
+        //}
 
         internal static void GetAffectedCurves(SplineInfo splineInfo, Vector3 knotPosition, SelectableKnot lastKnot, int previousKnotIndex, List<(Spline s, int index, List<BezierKnot> knots)> affectedCurves)
         {
@@ -851,18 +806,6 @@ namespace UnityEditor.YukselSplines
             for (int previousKnotIndex = 0; previousKnotIndex < spline.Count; ++previousKnotIndex)
             {
                 var knot = knots[previousKnotIndex];
-                var worldKnot = knot.Transform(splineInfo.LocalToWorld);
-                var tangentIn = worldKnot.TangentIn;
-                var tangentOut = worldKnot.TangentOut;
-
-                var reverseRotation = quaternion.AxisAngle(math.mul(knot.Rotation, math.up()), math.radians(180));
-                reverseRotation = math.normalizesafe(reverseRotation);
-
-                // Reverse the tangents to keep the same shape while reversing the order
-                knot.Rotation = math.mul(reverseRotation, knot.Rotation);
-                var localRot = quaternion.AxisAngle(math.up(), math.radians(180));
-                knot.TangentIn = math.rotate(localRot, tangentOut);
-                knot.TangentOut = math.rotate(localRot, tangentIn);
 
                 var newKnotIndex = spline.Count - 1 - previousKnotIndex;
                 spline[newKnotIndex] = knot;
@@ -894,63 +837,13 @@ namespace UnityEditor.YukselSplines
             return splines;
         }
 
-        internal static void GetAdjacentTangents<T>(
-            T element,
-            out SelectableTangent previousOut,
-            out SelectableTangent currentIn,
-            out SelectableTangent currentOut,
-            out SelectableTangent nextIn)
-            where T : ISplineElement
-        {
-            var knot = GetKnot(element);
-            var spline = knot.SplineInfo.Spline;
-            bool isFirstKnot = knot.KnotIndex == 0 && !spline.Closed;
-            bool isLastKnot = knot.KnotIndex == spline.Count - 1 && !spline.Closed;
-
-            previousOut = isFirstKnot ? default : new SelectableTangent(knot.SplineInfo, spline.PreviousIndex(knot.KnotIndex), BezierTangent.Out);
-            currentIn = isFirstKnot ? default : knot.TangentIn;
-            currentOut = isLastKnot ? default : knot.TangentOut;
-            nextIn = isLastKnot ? default : new SelectableTangent(knot.SplineInfo, spline.NextIndex(knot.KnotIndex), BezierTangent.In);
-        }
-
         internal static quaternion GetElementRotation<T>(T element)
             where T : ISplineElement
         {
-            if (element is SelectableTangent editableTangent)
-            {
-                float3 forward;
-                var knotUp = math.rotate(editableTangent.Owner.Rotation, math.up());
-
-                if (math.length(editableTangent.Direction) > 0)
-                    forward = math.normalize(editableTangent.Direction);
-                else // Treat zero length tangent same way as when it's parallel to knot's up vector
-                    forward = knotUp;
-
-                float3 right;
-                var dotForwardKnotUp = math.dot(forward, knotUp);
-                if (Mathf.Approximately(math.abs(dotForwardKnotUp), 1f))
-                    right = math.rotate(editableTangent.Owner.Rotation, math.right()) * math.sign(dotForwardKnotUp);
-                else
-                    right = math.cross(forward, knotUp);
-
-                return quaternion.LookRotationSafe(forward, math.cross(right, forward));
-            }
-
             if (element is SelectableKnot editableKnot)
                 return editableKnot.Rotation;
 
             return quaternion.identity;
-        }
-
-        /// <summary>
-        /// Sets the position of a tangent. This could actually result in the knot being rotated depending on the tangent mode
-        /// </summary>
-        /// <param name="tangent">The tangent to place</param>
-        /// <param name="position">The position that should be used to place the tangent</param>
-        internal static void ApplyPositionToTangent(SelectableTangent tangent, float3 position)
-        {
-            var knot = tangent.Owner;
-            tangent.Position = position;
         }
 
         internal static bool Exists(ISplineContainer container, int index)

@@ -257,8 +257,8 @@ namespace UnityEngine.YukselSplines
             }
 
             var spline = m_Splines[index.Spline];
-            var points = Spline.GetCurveKnotIndicesForIndex(index.Knot, spline.Count, spline.Closed);
-            return new BezierCurve(points.p0, points.p1, points.p2, points.p3);
+            var indices = Spline.GetCurveKnotIndicesForIndex(index.Knot, spline.Count, spline.Closed);
+            return new BezierCurve(this[indices.p0], this[indices.p1], this[indices.p2], this[indices.p3]);
         }
 
         /// <summary>

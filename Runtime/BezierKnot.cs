@@ -10,7 +10,7 @@ namespace UnityEngine.YukselSplines
     /// closed, the first and last knots will contain an extraneous tangent (in and out, respectively).
     /// </summary>
     [Serializable]
-    public struct BezierKnot : ISerializationCallbackReceiver, IEquatable<BezierKnot>
+    public struct BezierKnot : IEquatable<BezierKnot>
     {
         /// <summary>
         /// The position of the knot. On a cubic Bezier curve, this is equivalent to <see cref="BezierCurve.P0"/> or
@@ -20,39 +20,18 @@ namespace UnityEngine.YukselSplines
         public float3 Position;
 
         /// <summary>
-        /// The tangent vector that leads into this knot. On a cubic Bezier curve, this value is used to calculate
-        /// <see cref="BezierCurve.P2"/> when used as the second knot in a curve.
+        /// Rotation of the knot around its tangent in degrees.
         /// </summary>
-        public float3 TangentIn;
-
-        /// <summary>
-        /// The tangent vector that follows this knot. On a cubic Bezier curve, this value is used to calculate
-        /// <see cref="BezierCurve.P1"/> when used as the first knot in a curve.
-        /// </summary>
-        public float3 TangentOut;
-
-        /// <summary>
-        /// Rotation of the knot.
-        /// </summary>
-        public quaternion Rotation;
+        public float TwistAngle;
 
         /// <summary>
         /// Create a new BezierKnot struct.
         /// </summary>
         /// <param name="position">The position of the knot relative to the spline.</param>
-        public BezierKnot(float3 position): this(position, 0f, 0f, quaternion.identity)
+        public BezierKnot(float3 position)
         {
-        }
-
-        /// <summary>
-        /// Creates a new <see cref="BezierKnot"/> struct.
-        /// </summary>
-        /// <param name="position">The position of the knot relative to the spline.</param>
-        /// <param name="tangentIn">The leading tangent to this knot.</param>
-        /// <param name="tangentOut">The following tangent to this knot.</param>
-        public BezierKnot(float3 position, float3 tangentIn, float3 tangentOut)
-            : this(position, tangentIn, tangentOut, quaternion.identity)
-        {
+            Position = position;
+            TwistAngle = 0f;
         }
 
         /// <summary>
@@ -62,12 +41,10 @@ namespace UnityEngine.YukselSplines
         /// <param name="tangentIn">The leading tangent to this knot.</param>
         /// <param name="tangentOut">The following tangent to this knot.</param>
         /// <param name="rotation">The rotation of the knot relative to the spline.</param>
-        public BezierKnot(float3 position, float3 tangentIn, float3 tangentOut, quaternion rotation)
+        public BezierKnot(float3 position, float twistAngle)
         {
             Position = position;
-            TangentIn = tangentIn;
-            TangentOut = tangentOut;
-            Rotation = rotation;
+            TwistAngle = twistAngle;
         }
 
         /// <summary>
@@ -77,15 +54,9 @@ namespace UnityEngine.YukselSplines
         /// <returns>A new BezierKnot multiplied by matrix.</returns>
         public BezierKnot Transform(float4x4 matrix)
         {
-            var rotation = math.mul(new quaternion(matrix), Rotation);
-            var invRotation = math.inverse(rotation);
-            // Tangents need to be scaled, so rotation should be applied to them.
-            // No need however to use the translation as this is only a direction.
             return new BezierKnot(
                 math.transform(matrix, Position),
-                math.rotate(invRotation, math.rotate(matrix, math.rotate(Rotation,TangentIn))),
-                math.rotate(invRotation, math.rotate(matrix, math.rotate(Rotation,TangentOut))),
-                rotation);
+                TwistAngle);
         }
 
         /// <summary>
@@ -96,7 +67,7 @@ namespace UnityEngine.YukselSplines
         /// <returns>A new BezierKnot where position is the sum of knot.position and rhs.</returns>
         public static BezierKnot operator +(BezierKnot knot, float3 rhs)
         {
-            return new BezierKnot(knot.Position + rhs, knot.TangentIn, knot.TangentOut, knot.Rotation);
+            return new BezierKnot(knot.Position + rhs, knot.TwistAngle);
         }
 
         /// <summary>
@@ -107,52 +78,14 @@ namespace UnityEngine.YukselSplines
         /// <returns>A new BezierKnot where position is the sum of knot.position minus rhs.</returns>
         public static BezierKnot operator -(BezierKnot knot, float3 rhs)
         {
-            return new BezierKnot(knot.Position - rhs, knot.TangentIn, knot.TangentOut, knot.Rotation);
-        }
-
-        internal BezierKnot BakeTangentDirectionToRotation(bool mirrored, BezierTangent main = BezierTangent.Out)
-        {
-            if (mirrored)
-            {
-                float lead = math.length(main == BezierTangent.In ? TangentIn : TangentOut);
-                return new BezierKnot(Position,
-                    new float3(0f, 0f, -lead),
-                    new float3(0f, 0f,  lead),    
-                    SplineUtility.GetKnotRotation(
-                        math.mul(Rotation, main == BezierTangent.In ? -TangentIn : TangentOut),
-                        math.mul(Rotation, math.up())));
-            }
-
-            return new BezierKnot(Position,
-                new float3(0, 0, -math.length(TangentIn)),
-                new float3(0, 0, math.length(TangentOut)),
-                Rotation = SplineUtility.GetKnotRotation(
-                    math.mul(Rotation, main == BezierTangent.In ? -TangentIn : TangentOut),
-                    math.mul(Rotation, math.up())));
-        }
-
-        /// <summary>
-        /// See ISerializationCallbackReceiver.
-        /// </summary>
-        public void OnBeforeSerialize() {}
-
-        /// <summary>
-        /// See ISerializationCallbackReceiver.
-        /// </summary>
-        public void OnAfterDeserialize()
-        {
-            // Ensures that when adding the first knot via Unity inspector
-            // or when deserializing knot that did not have the rotation field prior,
-            // rotation is deserialized to identity instead of (0, 0, 0, 0) which does not represent a valid rotation.
-            if (math.lengthsq(Rotation) == 0f)
-                Rotation = quaternion.identity;
+            return new BezierKnot(knot.Position - rhs, knot.TwistAngle);
         }
 
         /// <summary>
         /// Create a string with the values of this knot.
         /// </summary>
         /// <returns>A summary of the values contained by this knot.</returns>
-        public override string ToString() => $"{{{Position}, {TangentIn}, {TangentOut}, {Rotation}}}";
+        public override string ToString() => $"{{{Position}, {TwistAngle}}}";
 
         /// <summary>
         /// Compare two knots for equality.
@@ -162,9 +95,7 @@ namespace UnityEngine.YukselSplines
         public bool Equals(BezierKnot other)
         {
             return Position.Equals(other.Position)
-                && TangentIn.Equals(other.TangentIn)
-                && TangentOut.Equals(other.TangentOut)
-                && Rotation.Equals(other.Rotation);
+                && TwistAngle.Equals(other.TwistAngle);
         }
 
         /// <summary>
@@ -188,7 +119,24 @@ namespace UnityEngine.YukselSplines
         /// </returns>
         public override int GetHashCode()
         {
-            return HashCode.Combine(Position, TangentIn, TangentOut, Rotation);
+            return HashCode.Combine(Position, TwistAngle);
+        }
+
+        public float3 GetUpVector(float3 tangent, float3 acceleration)
+        {
+            tangent = math.normalize(tangent);
+            acceleration = math.normalize(acceleration);
+
+            return AngleAxisVector(tangent, acceleration, math.radians(TwistAngle));
+        }
+
+        // https://en.wikipedia.org/wiki/Rodrigues%27_rotation_formula
+        static float3 AngleAxisVector(float3 axis, float3 vec, float radians)
+        {
+            var cos = math.cos(radians);
+            var sin = math.sin(radians);
+
+            return cos * vec + sin * math.cross(axis, vec) + axis * math.dot(axis, vec) * (1f - cos);
         }
     }
 }

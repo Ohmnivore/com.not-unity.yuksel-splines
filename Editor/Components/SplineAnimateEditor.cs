@@ -8,7 +8,7 @@ using UnityEngine.UIElements;
 
 namespace UnityEditor.YukselSplines
 {
-    [CustomEditor(typeof(SplineAnimate))]
+    [CustomEditor(typeof(UnityEngine.YukselSplines.SplineAnimate))]
     [CanEditMultipleObjects]
     class SplineAnimateEditor : UnityEditor.Editor
     {
