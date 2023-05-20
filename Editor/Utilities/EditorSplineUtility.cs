@@ -365,39 +365,36 @@ namespace UnityEditor.YukselSplines
         }
 
         //Get the affected curves when trying to add a knot on an existing segment
-        //internal static void GetAffectedCurves(SplineCurveHit hit, Dictionary<Spline, Dictionary<int, List<BezierKnot>>> affectedCurves)
-        //internal static void GetAffectedCurves(SplineCurveHit hit, List<(Spline s, int index,  List<BezierKnot> knots)> affectedCurves)
-        //{
-        //    var spline = hit.PreviousKnot.SplineInfo.Spline;
-        //    var curveIndex = hit.PreviousKnot.KnotIndex;
-        //    var hitLocalPosition = hit.PreviousKnot.SplineInfo.Transform.InverseTransformPoint(hit.Position);
+        internal static void GetAffectedCurves(SplineCurveHit hit, List<(Spline s, int index, List<BezierCurve> curves)> affectedCurves)
+        {
+            var spline = hit.PreviousKnot.SplineInfo.Spline;
+            var hitLocalPosition = hit.PreviousKnot.SplineInfo.Transform.InverseTransformPoint(hit.Position);
 
-        //    var previewKnots = new List<BezierKnot>();
+            var index1 = hit.PreviousKnot.SplineInfo.Spline.PreviousIndex(hit.PreviousKnot.KnotIndex);
+            var index2 = hit.PreviousKnot.KnotIndex;
+            var index3 = hit.NextKnot.KnotIndex;
 
-        //    var sKnot = hit.PreviousKnot;
-        //    var bKnot = new BezierKnot(sKnot.LocalPosition, sKnot.TangentIn.LocalPosition, sKnot.TangentOut.LocalPosition, sKnot.LocalRotation);
+            if (index1 != index2)
+            {
+                var p1 = Spline.GetCurveKnotIndicesForIndex(index1, spline.Count, spline.Closed);
+                var c1 = new BezierCurve(spline[p1.p0], spline[p1.p1], spline[p1.p2], new BezierKnot(hitLocalPosition), hit.PreviousKnot.SplineInfo.LocalToWorld);
+                affectedCurves.Add((spline, index1, new List<BezierCurve> { c1 }));
+            }
 
-        //    var insertedKnot = GetInsertedKnotPreview(hit.PreviousKnot.SplineInfo, hit.NextKnot.KnotIndex, hit.T, out var leftTangent, out var rightTangent);
+            var p2 = Spline.GetCurveKnotIndicesForIndex(index2, spline.Count, spline.Closed);
+            var c2 = new BezierCurve(spline[p2.p0], spline[p2.p1], new BezierKnot(hitLocalPosition), spline[p2.p2], hit.PreviousKnot.SplineInfo.LocalToWorld);
+            var c22 = new BezierCurve(spline[p2.p1], new BezierKnot(hitLocalPosition), spline[p2.p2], spline[p2.p3], hit.PreviousKnot.SplineInfo.LocalToWorld);
+            affectedCurves.Add((spline, index2, new List<BezierCurve> { c2, c22 }));
 
-        //    bKnot.TangentOut = math.mul(math.inverse(sKnot.LocalRotation), leftTangent);
+            if (index3 != index2)
+            {
+                var p3 = Spline.GetCurveKnotIndicesForIndex(index3, spline.Count, spline.Closed);
+                var c3 = new BezierCurve(new BezierKnot(hitLocalPosition), spline[p3.p1], spline[p3.p2], spline[p3.p3], hit.PreviousKnot.SplineInfo.LocalToWorld);
+                affectedCurves.Add((spline, index3, new List<BezierCurve> { c3 }));
+            }
+        }
 
-        //    previewKnots.Add(bKnot);
-
-        //    previewKnots.Add(insertedKnot);
-        //    var affectedCurveIndex = affectedCurves.FindIndex(x => x.s == spline && x.index == curveIndex);
-        //    if(affectedCurveIndex >= 0)
-        //        affectedCurves.RemoveAt(affectedCurveIndex);
-        //    affectedCurves.Add((spline, curveIndex, previewKnots));
-
-        //    sKnot = hit.NextKnot;
-        //    bKnot = new BezierKnot(sKnot.LocalPosition, sKnot.TangentIn.LocalPosition, sKnot.TangentOut.LocalPosition, sKnot.LocalRotation);
-
-        //    bKnot.TangentIn = math.mul(math.inverse(sKnot.LocalRotation), rightTangent);
-
-        //    previewKnots.Add(bKnot);
-        //}
-
-        internal static void GetAffectedCurves(SplineInfo splineInfo, Vector3 knotPosition, SelectableKnot lastKnot, int previousKnotIndex, List<(Spline s, int index, BezierCurve curve)> affectedCurves)
+        internal static void GetAffectedCurves(SplineInfo splineInfo, Vector3 knotPosition, SelectableKnot lastKnot, int previousKnotIndex, List<(Spline s, int index, List<BezierCurve> curves)> affectedCurves)
         {
             var spline = splineInfo.Spline;
             if (spline == null)
@@ -409,13 +406,13 @@ namespace UnityEditor.YukselSplines
             {
                 var points = Spline.GetCurveKnotIndicesForIndex(lastKnot.KnotIndex, spline.Count, spline.Closed);
                 var curve = new BezierCurve(new BezierKnot(knotPosition), spline[points.p1], spline[points.p2], spline[points.p3], splineInfo.LocalToWorld);
-                affectedCurves.Add((spline, lastKnot.KnotIndex, curve));
+                affectedCurves.Add((spline, lastKnot.KnotIndex, new List<BezierCurve> { curve }));
             }
             else
             {
                 var points = Spline.GetCurveKnotIndicesForIndex(previousKnotIndex, spline.Count, spline.Closed);
                 var curve = new BezierCurve(spline[points.p0], spline[points.p1], spline[points.p2], new BezierKnot(knotPosition), splineInfo.LocalToWorld);
-                affectedCurves.Add((spline, previousKnotIndex, curve));
+                affectedCurves.Add((spline, previousKnotIndex, new List<BezierCurve>{ curve }));
             }
         }
 

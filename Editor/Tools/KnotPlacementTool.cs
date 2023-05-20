@@ -280,7 +280,7 @@ namespace UnityEditor.YukselSplines
             HandleCancellation();
         }
 
-        internal static List<(Spline spline, int curveIndex, BezierCurve curve)> previewCurvesList = new();
+        internal static List<(Spline spline, int curveIndex, List<BezierCurve> curves)> previewCurvesList = new();
 
         void DrawSplines(IReadOnlyList<Object> targets, IReadOnlyList<SplineInfo> allSplines, Object mainTarget)
         {
@@ -310,15 +310,18 @@ namespace UnityEditor.YukselSplines
 
                             if (currentPreview.spline.Equals(spline) && currentPreview.curveIndex == i)
                             {
-                                CurveHandles.Draw(currentPreview.curve, isMainTarget);
-                                if (isMainTarget)
+                                foreach (var previewCurve in currentPreview.curves)
                                 {
-                                    CurveHandles.DrawFlow(
-                                        currentPreview.curve,
-                                        null,
-                                        -1,
-                                        math.rotate(new SelectableKnot(splineInfo, i).Rotation, math.up()),
-                                        math.rotate(new SelectableKnot(splineInfo, SplineUtility.NextIndex(i, spline.Count, spline.Closed)).Rotation, math.up()));
+                                    CurveHandles.Draw(previewCurve, isMainTarget);
+                                    if (isMainTarget)
+                                    {
+                                        CurveHandles.DrawFlow(
+                                            previewCurve,
+                                            null,
+                                            -1,
+                                            math.rotate(new SelectableKnot(splineInfo, i).Rotation, math.up()),
+                                            math.rotate(new SelectableKnot(splineInfo, SplineUtility.NextIndex(i, spline.Count, spline.Closed)).Rotation, math.up()));
+                                    }
                                 }
 
                                 previewIndex++;
@@ -473,11 +476,13 @@ namespace UnityEditor.YukselSplines
                     {
                         if (EditorSplineUtility.TryGetNearestKnot(splines, out SelectableKnot knot))
                         {
-                            drawPreview.Invoke(knot.Position, math.rotate(knot.Rotation, math.up()), float3.zero, knot);
+                            var tangent = knot.SplineInfo.Spline.GetCurve(knot.KnotIndex).EvaluateTangent(0f);
+                            drawPreview.Invoke(knot.Position, math.rotate(knot.Rotation, math.up()), tangent, knot);
                         }
                         else if (EditorSplineUtility.TryGetNearestPositionOnCurve(splines, out SplineCurveHit hit))
                         {
-                            drawPreview.Invoke(hit.Position, hit.Normal, float3.zero, default);
+                            var tangent = hit.PreviousKnot.SplineInfo.Spline.GetCurve(hit.PreviousKnot.KnotIndex).EvaluateTangent(hit.T);
+                            drawPreview.Invoke(hit.Position, math.up(), tangent, default);
                         }
                         else if (SplineHandleUtility.GetPointOnSurfaces(mousePosition, out Vector3 position,
                                      out Vector3 normal))
@@ -506,7 +511,7 @@ namespace UnityEditor.YukselSplines
                     else if (EditorSplineUtility.TryGetNearestPositionOnCurve(splines, out SplineCurveHit curveHit))
                     {
                         s_ClosestSpline = curveHit.PreviousKnot.SplineInfo;
-                        // EditorSplineUtility.GetAffectedCurves(curveHit, previewCurvesList);
+                        EditorSplineUtility.GetAffectedCurves(curveHit, previewCurvesList);
                     }
 
                     if (SplineHandleUtility.GetPointOnSurfaces(mouseMovePosition, out Vector3 pos, out Vector3 _))
