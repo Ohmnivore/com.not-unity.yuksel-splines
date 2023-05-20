@@ -280,8 +280,7 @@ namespace UnityEditor.YukselSplines
             HandleCancellation();
         }
 
-        // Curve id to SelectableKnotList - if we're inserting on a curve, we need 3 knots to preview the change, for other cases it's 2 knots
-        internal static List<(Spline spline, int curveIndex, List<BezierKnot> knots)> previewCurvesList = new();
+        internal static List<(Spline spline, int curveIndex, BezierCurve curve)> previewCurvesList = new();
 
         void DrawSplines(IReadOnlyList<Object> targets, IReadOnlyList<SplineInfo> allSplines, Object mainTarget)
         {
@@ -295,8 +294,7 @@ namespace UnityEditor.YukselSplines
                 EditorSplineUtility.GetSplinesFromTarget(target, m_SplineBuffer);
                 bool isMainTarget = target == mainTarget;
 
-                // var previewIndex = 0;
-
+                var previewIndex = 0;
 
                 //Draw curves
                 foreach (var splineInfo in m_SplineBuffer)
@@ -306,35 +304,27 @@ namespace UnityEditor.YukselSplines
 
                     for (int i = 0, count = spline.GetCurveCount(); i < count; ++i)
                     {
-                        // TODO
-                        //if (previewIndex < previewCurvesList.Count)
-                        //{
-                        //    var currentPreview = previewCurvesList[previewIndex];
+                        if (previewIndex < previewCurvesList.Count)
+                        {
+                            var currentPreview = previewCurvesList[previewIndex];
 
-                        //    if (currentPreview.spline.Equals(spline) && currentPreview.curveIndex == i)
-                        //    {
-                        //        var curveKnots = currentPreview.knots;
-                        //        for (int knotIndex = 0; knotIndex + 1 < curveKnots.Count; ++knotIndex)
-                        //        {
-                        //            var previewCurve =
-                        //                new BezierCurve(curveKnots[knotIndex], curveKnots[knotIndex + 1]);
-                        //            previewCurve = previewCurve.Transform(localToWorld);
-                        //            CurveHandles.Draw(previewCurve, isMainTarget);
-                        //            if (isMainTarget)
-                        //            {
-                        //                CurveHandles.DrawFlow(
-                        //                    previewCurve,
-                        //                    null,
-                        //                    -1,
-                        //                    math.rotate(new SelectableKnot(splineInfo, i).Rotation, math.up()),
-                        //                    math.rotate(new SelectableKnot(splineInfo, SplineUtility.NextIndex(i, spline.Count, spline.Closed)).Rotation, math.up()));
-                        //            }
-                        //        }
+                            if (currentPreview.spline.Equals(spline) && currentPreview.curveIndex == i)
+                            {
+                                CurveHandles.Draw(currentPreview.curve, isMainTarget);
+                                if (isMainTarget)
+                                {
+                                    CurveHandles.DrawFlow(
+                                        currentPreview.curve,
+                                        null,
+                                        -1,
+                                        math.rotate(new SelectableKnot(splineInfo, i).Rotation, math.up()),
+                                        math.rotate(new SelectableKnot(splineInfo, SplineUtility.NextIndex(i, spline.Count, spline.Closed)).Rotation, math.up()));
+                                }
 
-                        //        previewIndex++;
-                        //        continue;
-                        //    }
-                        //}
+                                previewIndex++;
+                                continue;
+                            }
+                        }
 
                         var curve = spline.GetCurve(i, localToWorld);
                         CurveHandles.Draw(curve, isMainTarget);

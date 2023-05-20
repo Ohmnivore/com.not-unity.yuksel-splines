@@ -9,8 +9,8 @@ namespace UnityEngine.YukselSplines
     /// </summary>
     public struct BezierCurve : IEquatable<BezierCurve>
     {
-        CircularInterpolator InterpolatorA;
-        CircularInterpolator InterpolatorB;
+        QuadraticBezierInterpolator InterpolatorA;
+        QuadraticBezierInterpolator InterpolatorB;
 
         ConstantTwistInterpolator TwistInterpolatorA;
         ConstantTwistInterpolator TwistInterpolatorB;

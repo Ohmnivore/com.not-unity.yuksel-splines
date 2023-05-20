@@ -397,15 +397,25 @@ namespace UnityEditor.YukselSplines
         //    previewKnots.Add(bKnot);
         //}
 
-        internal static void GetAffectedCurves(SplineInfo splineInfo, Vector3 knotPosition, SelectableKnot lastKnot, int previousKnotIndex, List<(Spline s, int index, List<BezierKnot> knots)> affectedCurves)
+        internal static void GetAffectedCurves(SplineInfo splineInfo, Vector3 knotPosition, SelectableKnot lastKnot, int previousKnotIndex, List<(Spline s, int index, BezierCurve curve)> affectedCurves)
         {
             var spline = splineInfo.Spline;
-            if (spline != null)
-            {
-                var lastKnotIndex = lastKnot.KnotIndex;
-                var inverted = previousKnotIndex > lastKnot.KnotIndex;
+            if (spline == null)
+                return;
 
-                var affectedCurveIndex = affectedCurves.FindIndex(x => x.s == spline && x.index == (inverted ? lastKnotIndex :  previousKnotIndex));
+            var inverted = previousKnotIndex > lastKnot.KnotIndex;
+
+            if (inverted)
+            {
+                var points = Spline.GetCurveKnotIndicesForIndex(lastKnot.KnotIndex, spline.Count, spline.Closed);
+                var curve = new BezierCurve(new BezierKnot(knotPosition), spline[points.p1], spline[points.p2], spline[points.p3], splineInfo.LocalToWorld);
+                affectedCurves.Add((spline, lastKnot.KnotIndex, curve));
+            }
+            else
+            {
+                var points = Spline.GetCurveKnotIndicesForIndex(previousKnotIndex, spline.Count, spline.Closed);
+                var curve = new BezierCurve(spline[points.p0], spline[points.p1], spline[points.p2], new BezierKnot(knotPosition), splineInfo.LocalToWorld);
+                affectedCurves.Add((spline, previousKnotIndex, curve));
             }
         }
 
