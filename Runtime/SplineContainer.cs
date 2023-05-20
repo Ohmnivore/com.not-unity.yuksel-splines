@@ -352,11 +352,11 @@ namespace UnityEngine.YukselSplines
             if (IsScaled)
             {
                 using var nativeSpline = new NativeSpline(spline, transform.localToWorldMatrix);
-                return SplineUtility.EvaluateUpVector(nativeSpline, t);
+                return nativeSpline.GetUpVector(t);
             }
 
             //Using TransformDirection as up direction is not sensible to scale.
-            return transform.TransformDirection(SplineUtility.EvaluateUpVector(spline, t));
+            return transform.TransformDirection(spline.GetUpVector(t));
         }
 
 

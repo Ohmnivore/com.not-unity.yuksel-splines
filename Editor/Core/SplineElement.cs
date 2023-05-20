@@ -48,23 +48,22 @@ namespace UnityEditor.YukselSplines
             set => LocalRotation = math.mul(math.inverse(new quaternion(LocalToWorld)), value);
         }
 
-        static readonly float LinearCutoff = 1.0f - math.acos(1f);
-
         public quaternion LocalRotation
         {
             get
             {
-                var knot = SplineInfo.Spline[KnotIndex];
                 var curve = SplineInfo.Spline.GetCurve(KnotIndex);
 
                 var tangent = curve.EvaluateTangent(0f);
-                var acceleration = curve.EvaluateAcceleration(0f);
 
-                var cosTheta = math.dot(tangent, acceleration) / (math.length(tangent) * math.length(acceleration));
-                if (math.abs(cosTheta) >= LinearCutoff)
-                    acceleration = math.up();
+                var distance = 0f;
+                for (var i = 0; i < KnotIndex; i++)
+                {
+                    distance += SplineInfo.Spline.GetCurveLength(i);
+                }
 
-                var up = knot.GetUpVector(tangent, acceleration);
+                var upT = distance / SplineInfo.Spline.GetLength();
+                var up = SplineInfo.Spline.GetUpVector(upT);
 
                 return quaternion.LookRotationSafe(tangent, up);
             }

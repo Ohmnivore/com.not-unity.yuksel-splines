@@ -9,16 +9,6 @@ namespace UnityEngine.YukselSplines
     /// </summary>
     public static class CurveUtility
     {
-        struct FrenetFrame
-        {
-            public float3 origin;
-            public float3 tangent;
-            public float3 normal;
-            public float3 binormal;
-        }
-
-        const int k_NormalsPerCurve = 16;
-        
         /// <summary>
         /// Given a Bezier curve, return an interpolated position at ratio t.
         /// </summary>
@@ -29,6 +19,18 @@ namespace UnityEngine.YukselSplines
         {
             t = math.clamp(t, 0, 1);
             return curve.EvaluatePosition(t);
+        }
+
+        /// <summary>
+        /// Given a Bezier curve, return an interpolated twist angle at ratio t.
+        /// </summary>
+        /// <param name="curve">A cubic Bezier curve.</param>
+        /// <param name="t">A value between 0 and 1 representing the ratio along the curve.</param>
+        /// <returns>A twist angle around the tangent at t on the curve.</returns>
+        public static float EvaluateTwistAngle(BezierCurve curve, float t)
+        {
+            t = math.clamp(t, 0, 1);
+            return curve.EvaluateTwistAngle(t);
         }
 
         /// <summary>
@@ -148,112 +150,6 @@ namespace UnityEngine.YukselSplines
         public static float ApproximateLength(BezierCurve curve)
         {
             return curve.ApproximateLength();
-        }
-
-        internal static float3 EvaluateUpVector(BezierCurve curve, float t, float3 startUp, float3 endUp)
-        {
-            var normalBuffer = new NativeArray<float3>(k_NormalsPerCurve, Allocator.Temp);
-            
-            // Construct initial frenet frame
-            FrenetFrame frame;
-            frame.origin = curve.EvaluatePosition(0f);
-            frame.tangent = curve.EvaluateTangent(0f);
-            frame.normal = startUp;
-            frame.binormal = math.normalize(math.cross(frame.tangent, frame.normal));
-            normalBuffer[0] = frame.normal;
-            
-            // Continue building remaining rotation minimizing frames
-            var stepSize = 1f / (k_NormalsPerCurve - 1);
-            var currentT = stepSize;
-            var prevT = 0f;
-            var upVector = float3.zero;
-            FrenetFrame prevFrame;
-            for (int i = 1; i < k_NormalsPerCurve; ++i)
-            {
-                prevFrame = frame;
-                frame = GetNextRotationMinimizingFrame(curve, prevFrame, currentT);
-                normalBuffer[i] = frame.normal;
-
-                if (prevT <= t && currentT >= t)
-                {
-                    var lerpT = (t - prevT) / stepSize;
-                    upVector = Vector3.Slerp(prevFrame.normal, frame.normal, lerpT);
-                }
-
-                prevT = currentT;
-                currentT += stepSize;
-            }
-
-            if (prevT <= t && currentT >= t)
-                upVector = endUp;
-
-            var lastFrameNormal = normalBuffer[k_NormalsPerCurve - 1];
-
-            var angleBetweenNormals = math.acos(math.clamp(math.dot(lastFrameNormal, endUp), -1f, 1f));
-            if (angleBetweenNormals == 0f)
-                return upVector;
-
-            // Since there's an angle difference between the end knot's normal and the last evaluated frenet frame's normal,
-            // the remaining code gradually applies the angle delta across the evaluated frames' normals.
-            var lastNormalTangent = math.normalize(frame.tangent);
-            var positiveRotation = quaternion.AxisAngle(lastNormalTangent, angleBetweenNormals);
-            var negativeRotation = quaternion.AxisAngle(lastNormalTangent, -angleBetweenNormals);
-            var positiveRotationResult = math.acos(math.clamp(math.dot(math.rotate(positiveRotation, endUp), lastFrameNormal), -1f, 1f));
-            var negativeRotationResult = math.acos(math.clamp(math.dot(math.rotate(negativeRotation, endUp), lastFrameNormal), -1f, 1f));
-
-            if (positiveRotationResult > negativeRotationResult)
-                angleBetweenNormals *= -1f;
-
-            currentT = stepSize;
-            prevT = 0f;
-            for (int i = 1; i < normalBuffer.Length; i++)
-            {
-                var normal = normalBuffer[i];
-                var adjustmentAngle = math.lerp(0f, angleBetweenNormals, currentT);
-                var tangent = math.normalize(EvaluateTangent(curve, currentT));
-                var adjustedNormal = math.rotate(quaternion.AxisAngle(tangent, -adjustmentAngle), normal);
-
-                normalBuffer[i] = adjustedNormal;
-
-                // Early exit if we've already adjusted the normals at offsets that curveT is in between
-                if (prevT <= t && currentT >= t)
-                {
-                    var lerpT = (t - prevT) / stepSize;
-                    upVector = Vector3.Slerp(normalBuffer[i - 1], normalBuffer[i], lerpT);
-
-                    return upVector;
-                }
-
-                prevT = currentT;
-                currentT += stepSize;
-            }
-
-            return endUp;
-        }
-
-        static FrenetFrame GetNextRotationMinimizingFrame(BezierCurve curve, FrenetFrame previousRMFrame, float nextRMFrameT)
-        {
-            FrenetFrame nextRMFrame;
-
-            // Evaluate position and tangent for next RM frame
-            nextRMFrame.origin = EvaluatePosition(curve, nextRMFrameT);
-            nextRMFrame.tangent = EvaluateTangent(curve, nextRMFrameT);
-
-            // Mirror the rotational axis and tangent
-            float3 toCurrentFrame = nextRMFrame.origin - previousRMFrame.origin;
-            float c1 = math.dot(toCurrentFrame, toCurrentFrame);
-            float3 riL = previousRMFrame.binormal - toCurrentFrame * 2f / c1 * math.dot(toCurrentFrame, previousRMFrame.binormal);
-            float3 tiL = previousRMFrame.tangent - toCurrentFrame * 2f / c1 * math.dot(toCurrentFrame, previousRMFrame.tangent);
-
-            // Compute a more stable binormal
-            float3 v2 = nextRMFrame.tangent - tiL;
-            float c2 = math.dot(v2, v2);
-
-            // Fix binormal's axis
-            nextRMFrame.binormal = math.normalize(riL - v2 * 2f / c2 * math.dot(v2, riL));
-            nextRMFrame.normal = math.normalize(math.cross(nextRMFrame.binormal, nextRMFrame.tangent));
-
-            return nextRMFrame;
         }
 
         static readonly DistanceToInterpolation[] k_DistanceLUT = new DistanceToInterpolation[24];

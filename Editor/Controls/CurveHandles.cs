@@ -171,7 +171,8 @@ namespace UnityEditor.YukselSplines
         {
             var position = (Vector3)CurveUtility.EvaluatePosition(curve, t);
             var tangent = ((Vector3)CurveUtility.EvaluateTangent(curve, t)).normalized;
-            var up = CurveUtility.EvaluateUpVector(curve, t, upAtStart, upAtEnd);
+            // var up = CurveUtility.EvaluateUpVector(curve, t, upAtStart, upAtEnd);
+            var up = math.up();
             var rotation = Quaternion.LookRotation(tangent, up);
 
             var arrowMaxSpline = .05f * CurveUtility.ApproximateLength(curve);

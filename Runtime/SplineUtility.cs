@@ -108,7 +108,7 @@ namespace UnityEngine.YukselSplines
 
             position = CurveUtility.EvaluatePosition(curve, curveT);
             tangent = CurveUtility.EvaluateTangent(curve, curveT);
-            upVector = spline.EvaluateUpVector(curveIndex, curveT);
+            upVector = spline.GetUpVector(curveT);
 
             return true;
         }
@@ -220,6 +220,21 @@ namespace UnityEngine.YukselSplines
         }
 
         /// <summary>
+        /// Return an interpolated twist angle at ratio t.
+        /// </summary>
+        /// <param name="spline">The spline to interpolate.</param>
+        /// <param name="t">A value between 0 and 1 representing the ratio along the curve.</param>
+        /// <typeparam name="T">A type implementing ISpline.</typeparam>
+        /// <returns>A twist angle around the tangent at t on the spline.</returns>
+        public static float EvaluateTwistAngle<T>(this T spline, float t) where T : ISpline
+        {
+            if (spline.Count < 1)
+                return float.PositiveInfinity;
+            var curve = spline.GetCurve(SplineToCurveT(spline, t, out var curveT));
+            return CurveUtility.EvaluateTwistAngle(curve, curveT);
+        }
+
+        /// <summary>
         /// Return an interpolated direction at ratio t.
         /// </summary>
         /// <param name="spline">The spline to interpolate.</param>
@@ -232,43 +247,6 @@ namespace UnityEngine.YukselSplines
                 return float.PositiveInfinity;
             var curve = spline.GetCurve(SplineToCurveT(spline, t, out var curveT));
             return CurveUtility.EvaluateTangent(curve, curveT);
-        }
-
-        /// <summary>
-        /// Evaluate the normal (up) vector of a spline.
-        /// </summary>
-        /// <param name="spline">The <seealso cref="NativeSpline"/> to evaluate.</param>
-        /// <param name="t">A value between 0 and 1 representing a percentage of the curve.</param>
-        /// <typeparam name="T">A type implementing ISpline.</typeparam>
-        /// <returns>An up vector</returns>
-        public static float3 EvaluateUpVector<T>(this T spline, float t) where T : ISpline
-        {
-            if (spline.Count < 1)
-                return float3.zero;
-
-            var curveIndex = SplineToCurveT(spline, t, out var curveT);
-            return spline.EvaluateUpVector(curveIndex, curveT);
-        }
-
-        static float3 EvaluateUpVector<T>(this T spline, int curveIndex, float curveT) where T : ISpline
-        {
-            if (spline.Count < 1)
-                return float3.zero;
-
-            var endKnotIndex = spline.NextIndex(curveIndex);
-
-            var curveStart = spline.GetCurve(curveIndex);
-            var curveEnd = spline.GetCurve(endKnotIndex);
-
-            var curveStartUp = spline[curveIndex].GetUpVector(curveStart.EvaluateTangent(0f), curveStart.EvaluateAcceleration(0f));
-            if (curveT == 0f)
-                return curveStartUp;
-
-            var curveEndUp = spline[endKnotIndex].GetUpVector(curveEnd.EvaluateTangent(0f), curveEnd.EvaluateAcceleration(0f));
-            if (curveT == 1f)
-                return curveEndUp;
-
-            return CurveUtility.EvaluateUpVector(curveStart, curveT, curveStartUp, curveEndUp);
         }
 
         /// <summary>

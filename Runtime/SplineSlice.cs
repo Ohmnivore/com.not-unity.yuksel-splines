@@ -41,10 +41,8 @@ namespace UnityEngine.YukselSplines
         /// Return the number of knots in this branch. This function clamps the <see cref="Range"/> to the Count of the
         /// the referenced <see cref="Spline"/>.
         /// </summary>
-        public int Count
-        {
-            get
-            {
+        public int Count {
+            get {
                 if (Spline.Closed)
                     return math.clamp(Range.Count, 0, Spline.Count + 1);
 
@@ -64,10 +62,8 @@ namespace UnityEngine.YukselSplines
         /// Get a <see cref="BezierKnot"/> at the zero-based index of this <see cref="SplineSlice{T}"/>.
         /// </summary>
         /// <param name="index">The index to get.</param>
-        public BezierKnot this[int index]
-        {
-            get
-            {
+        public BezierKnot this[int index] {
+            get {
                 int indexFromRange = Range[index];
                 indexFromRange = (indexFromRange + Spline.Count) % Spline.Count;
 
@@ -103,7 +99,7 @@ namespace UnityEngine.YukselSplines
         /// <param name="range">The start index and count of knot indices that compose this slice.</param>
         public SplineSlice(T spline, SplineRange range)
             : this(spline, range, float4x4.identity)
-        {}
+        { }
 
         /// <summary>
         /// Constructor for a new SplineSlice.
@@ -192,6 +188,26 @@ namespace UnityEngine.YukselSplines
         public float GetCurveInterpolation(int curveIndex, float curveDistance)
         {
             return CurveUtility.GetDistanceToInterpolation(GetCurve(curveIndex), curveDistance);
+        }
+
+        /// <summary>
+        /// Evaluate the normal (up) vector of a spline.
+        /// </summary>
+        /// <param name="t">A value between 0 and 1 representing a percentage of the curve.</param>
+        /// <returns>An up vector</returns>
+        public float3 GetUpVector(float t)
+        {
+            var startDistance = 0f;
+
+            for (var i = 0; i <= Range.Start; i++)
+            {
+                startDistance += Spline.GetCurveLength(i);
+            }
+
+            var splineT = math.lerp(startDistance, startDistance + GetLength(), t);
+            splineT /= Spline.GetLength();
+
+            return Spline.GetUpVector(splineT);
         }
     }
 }

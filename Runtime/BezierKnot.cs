@@ -122,14 +122,6 @@ namespace UnityEngine.YukselSplines
             return HashCode.Combine(Position, TwistAngle);
         }
 
-        public float3 GetUpVector(float3 tangent, float3 acceleration)
-        {
-            tangent = math.normalize(tangent);
-            acceleration = math.normalize(acceleration);
-
-            return AngleAxisVector(tangent, acceleration, math.radians(TwistAngle));
-        }
-
         // https://en.wikipedia.org/wiki/Rodrigues%27_rotation_formula
         static float3 AngleAxisVector(float3 axis, float3 vec, float radians)
         {

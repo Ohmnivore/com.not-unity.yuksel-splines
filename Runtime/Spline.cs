@@ -12,9 +12,8 @@ namespace UnityEngine.YukselSplines
     /// The Spline class is a collection of <see cref="BezierKnot"/>, the closed/open state, and editing representation.
     /// </summary>
     [Serializable]
-    public class Spline : ISpline, IList<BezierKnot>
+    public class Spline : ISpline, IList<BezierKnot>, ISerializationCallbackReceiver
     {
-        const BezierTangent k_DefaultMainTangent = BezierTangent.Out;
         const int k_BatchModification = -1;
 
         [Serializable]
@@ -62,6 +61,8 @@ namespace UnityEngine.YukselSplines
 
         [SerializeField]
         SplineDataDictionary<UObject> m_ObjectData = new SplineDataDictionary<UObject>();
+
+        NormalCache m_NormalCache = new NormalCache();
 
         IEnumerable<ISplineModificationHandler> embeddedSplineData
         {
@@ -246,6 +247,8 @@ namespace UnityEngine.YukselSplines
             m_Length = -1f;
             for (int i = 0, c = m_MetaData.Count; i < c; ++i)
                 m_MetaData[i].InvalidateCache();
+
+            m_NormalCache.Populate(this, NormalCache.DefaultStepSize);
         }
 
         internal void SetDirty(SplineModification modificationEvent, int knotIndex = k_BatchModification)
@@ -395,11 +398,10 @@ namespace UnityEngine.YukselSplines
         /// <param name="index">The index of the <see cref="BezierKnot"/> to set.</param>
         /// <param name="value">The <see cref="BezierKnot"/> to set.</param>
         /// <param name="main">The tangent to prioritize if the tangents are modified to conform with the
-        /// <see cref="TangentMode"/> set for this knot.</param>
-        public void SetKnot(int index, BezierKnot value, BezierTangent main = k_DefaultMainTangent)
+        public void SetKnot(int index, BezierKnot value)
         {
             CacheKnotOperationCurves(index);
-            SetKnotNoNotify(index, value, main);
+            SetKnotNoNotify(index, value);
             SetDirty(SplineModification.KnotModified, index);
         }
 
@@ -409,8 +411,7 @@ namespace UnityEngine.YukselSplines
         /// <param name="index">The index of the <see cref="BezierKnot"/> to set.</param>
         /// <param name="value">The <see cref="BezierKnot"/> to set.</param>
         /// <param name="main">The tangent to prioritize if the tangents are modified to conform with the
-        /// <see cref="TangentMode"/> set for this knot.</param>
-        public void SetKnotNoNotify(int index, BezierKnot value, BezierTangent main = k_DefaultMainTangent)
+        public void SetKnotNoNotify(int index, BezierKnot value)
         {
             m_Knots[index] = value;
         }
@@ -429,6 +430,8 @@ namespace UnityEngine.YukselSplines
         {
             m_Knots = new List<BezierKnot>(knotCapacity);
             m_Closed = closed;
+
+            m_NormalCache.Populate(this, NormalCache.DefaultStepSize);
         }
 
         /// <summary>
@@ -440,6 +443,8 @@ namespace UnityEngine.YukselSplines
         {
             m_Knots = knots.ToList();
             m_Closed = closed;
+
+            m_NormalCache.Populate(this, NormalCache.DefaultStepSize);
         }
         
         /// <summary>
@@ -450,6 +455,8 @@ namespace UnityEngine.YukselSplines
         {
             m_Knots = spline.Knots.ToList();
             m_Closed = spline.Closed;
+
+            m_NormalCache.Populate(this, NormalCache.DefaultStepSize);
 
             //Deep copy of the 4 embedded SplineData
             foreach (var data in spline.m_IntData)
@@ -563,6 +570,16 @@ namespace UnityEngine.YukselSplines
         /// <returns>  The normalized interpolation ratio associated to distance on the designated curve.</returns>
         public float GetCurveInterpolation(int curveIndex, float curveDistance)
             => CurveUtility.GetDistanceToInterpolation(GetCurveDistanceLut(curveIndex), curveDistance);
+
+        /// <summary>
+        /// Evaluate the normal (up) vector of a spline.
+        /// </summary>
+        /// <param name="t">A value between 0 and 1 representing a percentage of the curve.</param>
+        /// <returns>An up vector</returns>
+        public float3 GetUpVector(float t)
+        {
+            return m_NormalCache.Evaluate(t);
+        }
 
         /// <summary>
         /// Ensure that all caches contain valid data. Call this to avoid unexpected performance costs when accessing
@@ -713,6 +730,16 @@ namespace UnityEngine.YukselSplines
             m_LastKnotChangeCurveLengths.curve0= GetCurveLength(this.PreviousIndex(index));
             if (index < Count)
                 m_LastKnotChangeCurveLengths.curve1 = GetCurveLength(index);
+        }
+
+        public void OnBeforeSerialize()
+        {
+
+        }
+
+        public void OnAfterDeserialize()
+        {
+            m_NormalCache.Populate(this, NormalCache.DefaultStepSize);
         }
     }
 }

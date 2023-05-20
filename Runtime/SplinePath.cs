@@ -294,5 +294,32 @@ namespace UnityEngine.YukselSplines
             var slice = m_Splines[knot.Spline];
             return slice.GetCurveInterpolation(knot.Knot, curveDistance);
         }
+
+        /// <summary>
+        /// Evaluate the normal (up) vector of a spline.
+        /// </summary>
+        /// <param name="t">A value between 0 and 1 representing a percentage of the curve.</param>
+        /// <returns>An up vector</returns>
+        public float3 GetUpVector(float t)
+        {
+            var distanceT = t * GetLength();
+            var currentDistance = 0f;
+
+            for (var i = 0; i < m_Splines.Length; i++)
+            {
+                var spline = m_Splines[i];
+                var splineLength = spline.GetLength();
+
+                if (currentDistance + splineLength >= distanceT)
+                {
+                    var splineT = math.unlerp(currentDistance, currentDistance + splineLength, distanceT);
+                    return spline.GetUpVector(splineT);
+                }
+
+                currentDistance += splineLength;
+            }
+
+            throw new InvalidOperationException();
+        }
     }
 }

@@ -591,8 +591,8 @@ namespace UnityEditor.YukselSplines
             if (nearestDist > maxDistance)
                 return false;
 
-            var up = CurveUtility.EvaluateUpVector(nearestCurve, nearestHit.T, math.rotate(nearestHit.PreviousKnot.Rotation, math.up()), math.rotate(nearestHit.NextKnot.Rotation, math.up()));
-            nearestHit.Normal = up;
+            //var up = CurveUtility.EvaluateUpVector(nearestCurve, nearestHit.T, math.rotate(nearestHit.PreviousKnot.Rotation, math.up()), math.rotate(nearestHit.NextKnot.Rotation, math.up()));
+            //nearestHit.Normal = up;
 
             hit = nearestHit;
             return true;
