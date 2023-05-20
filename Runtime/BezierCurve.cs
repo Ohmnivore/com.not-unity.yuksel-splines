@@ -190,14 +190,17 @@ namespace UnityEngine.YukselSplines
         /// <returns>An estimate of the length of a curve.</returns>
         public float ApproximateLength()
         {
-            var P0 = InterpolatorA.Evaluate(0f);
-            var P1 = InterpolatorB.Evaluate(0f);
-            var P2 = InterpolatorA.Evaluate(1f);
-            var P3 = InterpolatorB.Evaluate(1f);
+            var length = 0f;
+            var prev = EvaluatePosition(0f);
 
-            float chord = math.length(P3 - P0);
-            float net = math.length(P0 - P1) + math.length(P2 - P1) + math.length(P3 - P2);
-            return (net + chord) / 2;
+            for (var t = 0f; t <= 1f; t += 0.25f)
+            {
+                var cur = EvaluatePosition(t);
+                length += math.distance(prev, cur);
+                prev = cur;
+            }
+
+            return length;
         }
 
         /// <summary>
