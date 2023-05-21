@@ -55,36 +55,14 @@ namespace UnityEditor.YukselSplines
                 var curve = SplineInfo.Spline.GetCurve(KnotIndex);
 
                 var tangent = curve.EvaluateTangent(0f);
-
-                var distance = 0f;
-                for (var i = 0; i < KnotIndex; i++)
-                {
-                    distance += SplineInfo.Spline.GetCurveLength(i);
-                }
-
-                var upT = distance / SplineInfo.Spline.GetLength();
-                var up = SplineInfo.Spline.GetUpVector(upT);
+                var up = math.up();
 
                 return quaternion.LookRotationSafe(tangent, up);
             }
 
             set
             {
-                // TODO
-                //var knot = SplineInfo.Spline[KnotIndex];
-                //knot.Rotation = math.normalize(value);
-                //SplineInfo.Spline[KnotIndex] = knot;
-            }
-        }
 
-        public float TwistAngle
-        {
-            get => SplineInfo.Spline[KnotIndex].TwistAngle;
-            set
-            {
-                var knot = SplineInfo.Spline[KnotIndex];
-                knot.TwistAngle = value;
-                SplineInfo.Spline[KnotIndex] = knot;
             }
         }
 

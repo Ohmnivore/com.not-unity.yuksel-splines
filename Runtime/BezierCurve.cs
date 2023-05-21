@@ -12,31 +12,19 @@ namespace UnityEngine.YukselSplines
         QuadraticBezierInterpolator InterpolatorA;
         QuadraticBezierInterpolator InterpolatorB;
 
-        ConstantTwistInterpolator TwistInterpolatorA;
-        ConstantTwistInterpolator TwistInterpolatorB;
-
         public BezierCurve(BezierKnot c0, BezierKnot c1, BezierKnot c2, BezierKnot c3)
         {
             InterpolatorA = default;
             InterpolatorB = default;
 
-            TwistInterpolatorA = default;
-            TwistInterpolatorB = default;
-
             InterpolatorA.Initialize(c0.Position, c1.Position, c2.Position);
             InterpolatorB.Initialize(c1.Position, c2.Position, c3.Position);
-
-            TwistInterpolatorA.Initialize(c0.TwistAngle, c1.TwistAngle, c2.TwistAngle);
-            TwistInterpolatorB.Initialize(c1.TwistAngle, c2.TwistAngle, c3.TwistAngle);
         }
 
         public BezierCurve(BezierCurve other)
         {
             InterpolatorA = other.InterpolatorA;
             InterpolatorB = other.InterpolatorB;
-
-            TwistInterpolatorA = other.TwistInterpolatorA;
-            TwistInterpolatorB = other.TwistInterpolatorB;
         }
 
         public BezierCurve(BezierKnot c0, BezierKnot c1, BezierKnot c2, BezierKnot c3, float4x4 matrix) :
@@ -58,24 +46,6 @@ namespace UnityEngine.YukselSplines
 
             var interpolatedA = InterpolatorA.Evaluate(localParameterA);
             var interpolatedB = InterpolatorB.Evaluate(localParameterB);
-
-            var blended = TrigonometricBlend(trigonometricParameteter, interpolatedA, interpolatedB);
-            return blended;
-        }
-
-        /// <summary>
-        /// Return an interpolated twist angle at ratio t.
-        /// </summary>
-        /// <param name="t">A value between 0 and 1 representing the ratio along the curve.</param>
-        /// <returns>A twist angle around the curve tangent at t.</returns>
-        public float EvaluateTwistAngle(float t)
-        {
-            var trigonometricParameteter = GetTrigonometricParameter(t);
-            var localParameterA = TwistInterpolatorA.T + (1f - TwistInterpolatorA.T) * t;
-            var localParameterB = TwistInterpolatorB.T * t;
-
-            var interpolatedA = TwistInterpolatorA.Evaluate(localParameterA);
-            var interpolatedB = TwistInterpolatorB.Evaluate(localParameterB);
 
             var blended = TrigonometricBlend(trigonometricParameteter, interpolatedA, interpolatedB);
             return blended;

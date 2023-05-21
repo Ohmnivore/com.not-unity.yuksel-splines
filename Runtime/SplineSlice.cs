@@ -189,25 +189,5 @@ namespace UnityEngine.YukselSplines
         {
             return CurveUtility.GetDistanceToInterpolation(GetCurve(curveIndex), curveDistance);
         }
-
-        /// <summary>
-        /// Evaluate the normal (up) vector of a spline.
-        /// </summary>
-        /// <param name="t">A value between 0 and 1 representing a percentage of the curve.</param>
-        /// <returns>An up vector</returns>
-        public float3 GetUpVector(float t)
-        {
-            var startDistance = 0f;
-
-            for (var i = 0; i <= Range.Start; i++)
-            {
-                startDistance += Spline.GetCurveLength(i);
-            }
-
-            var splineT = math.lerp(startDistance, startDistance + GetLength(), t);
-            splineT /= Spline.GetLength();
-
-            return Spline.GetUpVector(splineT);
-        }
     }
 }

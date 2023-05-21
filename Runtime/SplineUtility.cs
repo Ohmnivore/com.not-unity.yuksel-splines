@@ -108,7 +108,7 @@ namespace UnityEngine.YukselSplines
 
             position = CurveUtility.EvaluatePosition(curve, curveT);
             tangent = CurveUtility.EvaluateTangent(curve, curveT);
-            upVector = spline.GetUpVector(curveT);
+            upVector = math.up();
 
             return true;
         }
@@ -217,21 +217,6 @@ namespace UnityEngine.YukselSplines
                 return float.PositiveInfinity;
             var curve = spline.GetCurve(SplineToCurveT(spline, t, out var curveT));
             return CurveUtility.EvaluatePosition(curve, curveT);
-        }
-
-        /// <summary>
-        /// Return an interpolated twist angle at ratio t.
-        /// </summary>
-        /// <param name="spline">The spline to interpolate.</param>
-        /// <param name="t">A value between 0 and 1 representing the ratio along the curve.</param>
-        /// <typeparam name="T">A type implementing ISpline.</typeparam>
-        /// <returns>A twist angle around the tangent at t on the spline.</returns>
-        public static float EvaluateTwistAngle<T>(this T spline, float t) where T : ISpline
-        {
-            if (spline.Count < 1)
-                return float.PositiveInfinity;
-            var curve = spline.GetCurve(SplineToCurveT(spline, t, out var curveT));
-            return CurveUtility.EvaluateTwistAngle(curve, curveT);
         }
 
         /// <summary>

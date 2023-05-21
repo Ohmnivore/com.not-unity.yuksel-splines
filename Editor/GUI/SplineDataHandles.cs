@@ -126,7 +126,7 @@ namespace UnityEditor.YukselSplines
                     {
                         var ray = HandleUtility.GUIPointToWorldRay(evt.mousePosition);
                         SplineUtility.GetNearestPoint(spline, ray, out var pos, out var t);
-                        var upDir = spline.GetUpVector(t);
+                        var upDir = math.up();
                         Handles.CircleHandleCap(controlID, pos, Quaternion.LookRotation(upDir), 0.15f * HandleUtility.GetHandleSize(pos), EventType.Repaint);
                     }
                     break;

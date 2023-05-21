@@ -322,43 +322,6 @@ namespace UnityEngine.YukselSplines
             return transform.TransformVector(SplineUtility.EvaluateTangent(spline, t));
         }
 
-        /// <summary>
-        /// Evaluates the up vector of a point, t, on a spline in world space.
-        /// </summary>
-        /// <param name="t">A value between 0 and 1 representing a percentage of entire spline.</param>
-        /// <returns>The computed up direction.</returns>
-        public float3 EvaluateUpVector(float t) => EvaluateUpVector(0, t);
-
-        /// <summary>
-        /// Evaluates the up vector of a point, t, on a spline at an index, `splineIndex`, in world space.
-        /// </summary>
-        /// <param name="splineIndex">The index of the Spline to evaluate.</param>
-        /// <param name="t">A value between 0 and 1 representing a percentage of entire spline.</param>
-        /// <returns>The computed up direction.</returns>
-        public float3 EvaluateUpVector(int splineIndex, float t) => EvaluateUpVector(Splines[splineIndex], t);
-
-        /// <summary>
-        /// Evaluates the up vector of a point, t, on a given spline, in world space.
-        /// </summary>
-        /// <typeparam name="T">The spline type.</typeparam>
-        /// <param name="spline">The Spline to evaluate.</param>
-        /// <param name="t">A value between 0 and 1 representing a percentage of entire spline.</param>
-        /// <returns>The computed up direction.</returns>
-        public float3 EvaluateUpVector<T>(T spline, float t) where T : ISpline
-        {
-            if (spline == null)
-                return float3.zero;
-
-            if (IsScaled)
-            {
-                using var nativeSpline = new NativeSpline(spline, transform.localToWorldMatrix);
-                return nativeSpline.GetUpVector(t);
-            }
-
-            //Using TransformDirection as up direction is not sensible to scale.
-            return transform.TransformDirection(spline.GetUpVector(t));
-        }
-
 
         /// <summary>
         /// Evaluates the acceleration vector of a point, t, on a spline in world space.

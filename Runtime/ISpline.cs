@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Unity.Mathematics;
 
 namespace UnityEngine.YukselSplines
 {
@@ -83,12 +82,5 @@ namespace UnityEngine.YukselSplines
         /// <param name="curveDistance"> The distance (measuring from the knot at curveIndex) to convert to a normalized interpolation ratio.</param>
         /// <returns>The normalized interpolation ratio matching distance on the designated curve. </returns>
         public float GetCurveInterpolation(int curveIndex, float curveDistance);
-
-        /// <summary>
-        /// Evaluate the normal (up) vector of a spline.
-        /// </summary>
-        /// <param name="t">A value between 0 and 1 representing a percentage of the curve.</param>
-        /// <returns>An up vector</returns>
-        public float3 GetUpVector(float t);
     }
 }

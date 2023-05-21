@@ -583,7 +583,7 @@ namespace UnityEngine.YukselSplines
                 {
                     case AlignmentMode.SplineElement:
                         forward = Vector3.Normalize(m_Target.EvaluateTangent(m_SplinePath, t));
-                        up = m_Target.EvaluateUpVector(m_SplinePath, t);
+                        // up = m_Target.EvaluateUpVector(m_SplinePath, t);
                         break;
 
                     case AlignmentMode.SplineObject:

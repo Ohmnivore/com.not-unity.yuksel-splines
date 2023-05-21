@@ -32,8 +32,6 @@ namespace UnityEngine.YukselSplines
         float m_Length;
         const int k_SegmentResolution = 30;
 
-        NormalCache m_NormalCache;
-
         /// <summary>
         /// A NativeArray of <see cref="BezierKnot"/> that form this Spline.
         /// </summary>
@@ -184,9 +182,6 @@ namespace UnityEngine.YukselSplines
                         m_SegmentLengthsLookupTable[i * k_SegmentResolution + distanceToTimeIndex] = distanceToTimes[distanceToTimeIndex];
                 }
             }
-
-            m_NormalCache = new NormalCache();
-            m_NormalCache.Populate(this, NormalCache.DefaultStepSize);
         }
 
         /// <summary>
@@ -246,16 +241,6 @@ namespace UnityEngine.YukselSplines
             var startIndex = curveIndex * k_SegmentResolution;
             var slice = new Slice<DistanceToInterpolation>(m_SegmentLengthsLookupTable, startIndex, k_SegmentResolution);
             return CurveUtility.GetDistanceToInterpolation(slice, curveDistance);
-        }
-
-        /// <summary>
-        /// Evaluate the normal (up) vector of a spline.
-        /// </summary>
-        /// <param name="t">A value between 0 and 1 representing a percentage of the curve.</param>
-        /// <returns>An up vector</returns>
-        public float3 GetUpVector(float t)
-        {
-            return m_NormalCache.Evaluate(t);
         }
     }
 }

@@ -10,10 +10,8 @@ namespace UnityEditor.YukselSplines
     sealed class BezierKnotDrawer : ElementDrawer<SelectableKnot>
     {
         static readonly string k_PositionTooltip = L10n.Tr("Knot Position");
-        static readonly string k_TwistTooltip = L10n.Tr("Knot Twist Angle");
 
         readonly Float3PropertyField<SelectableKnot> m_Position;
-        readonly FloatPropertyField<SelectableKnot> m_Twist;
 
         public BezierKnotDrawer()
         {
@@ -28,17 +26,6 @@ namespace UnityEditor.YukselSplines
                 { name = "Position" });
 
             m_Position.style.flexGrow = 1;
-
-            Add(row = new VisualElement(){name = "Vector3WithIcon"});
-            row.tooltip = k_TwistTooltip;
-            row.style.flexDirection = FlexDirection.Row;
-            row.Add(new VisualElement(){name = "RotationIcon"});
-            row.Add(m_Twist = new FloatPropertyField<SelectableKnot>("Twist",
-                (knot) => knot.TwistAngle,
-                (knot, value) => knot.TwistAngle = value)
-                { name = "Twist Angle" });
-
-            m_Twist.style.flexGrow = 1;
 
             Add(new Separator());
 
@@ -58,7 +45,6 @@ namespace UnityEditor.YukselSplines
             base.Update();
             
             m_Position.Update(targets);
-            m_Twist.Update(targets);
         }
     }
 }

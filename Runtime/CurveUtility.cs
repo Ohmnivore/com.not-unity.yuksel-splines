@@ -22,18 +22,6 @@ namespace UnityEngine.YukselSplines
         }
 
         /// <summary>
-        /// Given a Bezier curve, return an interpolated twist angle at ratio t.
-        /// </summary>
-        /// <param name="curve">A cubic Bezier curve.</param>
-        /// <param name="t">A value between 0 and 1 representing the ratio along the curve.</param>
-        /// <returns>A twist angle around the tangent at t on the curve.</returns>
-        public static float EvaluateTwistAngle(BezierCurve curve, float t)
-        {
-            t = math.clamp(t, 0, 1);
-            return curve.EvaluateTwistAngle(t);
-        }
-
-        /// <summary>
         /// Given a Bezier curve, return an interpolated tangent at ratio t.
         /// </summary>
         /// <param name="curve">A cubic Bezier curve.</param>

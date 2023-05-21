@@ -185,24 +185,7 @@ namespace UnityEditor.YukselSplines
             else
                 knot.Rotation = math.mul(s_HandleRotation, math.mul(deltaRotation, math.mul(s_HandleRotationInv, knot.Rotation)));
 
-            if (SplineTool.handleOrientation == HandleOrientation.Element)
-            {
-                RotateTwistAngle(knot, deltaRotation);
-            }
-
             s_RotatedKnotCache.Add(knot);
-        }
-
-        static void RotateTwistAngle(SelectableKnot knot, quaternion deltaRotation)
-        {
-            var finalRotation = math.mul(deltaRotation, knot.Rotation);
-
-            var axis = math.mul(knot.Rotation, math.forward());
-            var v1 = math.mul(knot.Rotation, math.up());
-            var v2 = math.mul(finalRotation, math.up());
-
-            var deltaZ = Vector3.SignedAngle(v1, v2, axis);
-            knot.TwistAngle += deltaZ;
         }
 
         static SelectableKnot GetCurrentSelectionKnot()
