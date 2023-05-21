@@ -48,10 +48,29 @@ namespace UnityEngine.YukselSplines
                 DirC = math.normalize(c - Center);
 
                 var axis = math.cross(DirA, DirC);
-                AngleRange = Vector3.SignedAngle(DirA, DirC, axis);
 
-                var bAngle = Vector3.SignedAngle(DirA, DirB, axis);
-                t = bAngle / AngleRange;
+                // TODO project on plane and inverse trig instead
+                var abAngle = Vector3.SignedAngle(DirA, DirB, axis);
+                var acAngle = Vector3.SignedAngle(DirA, DirC, axis);
+
+                var abSign = math.sign(abAngle);
+                var acSign = math.sign(acAngle);
+
+                if (abSign != acSign)
+                {
+                    // A to C doesn't pass by B, flip it:
+                    acAngle = -(360f - math.abs(acAngle)) * acSign;
+                }
+                else if (acAngle < abAngle)
+                {
+                    // A to C doesn't pass by B, flip it:
+                    abAngle = -(360f - math.abs(abAngle)) * abSign;
+                    acAngle = -(360f - math.abs(acAngle)) * acSign;
+                }
+
+                AngleRange = acAngle;
+
+                t = abAngle / acAngle;
 
                 CircleRotation = quaternion.LookRotation(DirA, axis);
 
