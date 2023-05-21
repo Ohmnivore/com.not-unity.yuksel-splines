@@ -194,6 +194,8 @@ namespace UnityEditor.YukselSplines
                     ? EditorSplineUtility.GetPreviewCurveFromStart(CurrentSplineInfo, lastKnot.KnotIndex, position)
                     : EditorSplineUtility.GetPreviewCurveFromEnd(CurrentSplineInfo, lastKnot.KnotIndex, position);
 
+                tangent = previewCurve.EvaluateTangent(1f);
+
                 CurveHandles.Draw(-1, previewCurve);
 
 #if UNITY_2022_2_OR_NEWER
